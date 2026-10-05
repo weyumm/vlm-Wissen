@@ -210,6 +210,45 @@ button, input, select { font: inherit; }
 .side-parts a[aria-current="page"] { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 .side-parts b { font: 600 11px var(--mono); opacity: .75; }
 
+.side-chapters { display: grid; gap: 2px; margin-bottom: 14px; }
+.side-chapter {
+  display: block;
+  padding: 7px 10px;
+  border-radius: 7px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.side-chapter:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
+.side-chapter[aria-current="page"] {
+  background: var(--accent-soft);
+  border-left-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.chapter-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+.chapter-btn {
+  max-width: 48%;
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 13px;
+  line-height: 1.4;
+}
+.chapter-btn:hover { border-color: var(--accent); text-decoration: none; }
+.chapter-btn.next { margin-left: auto; text-align: right; }
+
 .side-link {
   display: block;
   padding: 6px 10px;

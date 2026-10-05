@@ -50,6 +50,84 @@
   renderNav(document.getElementById('side-parts'));
   renderHero();
 
+  /* ---------- chapters ---------- */
+
+  var CHAPTERS = (window.VLM_CHAPTERS || {})[key] || [];
+  var chapterHost = document.getElementById('side-chapters');
+  var chapterSection = document.getElementById('chapter-section');
+  var currentChapter = 0;
+
+  function chapterNumFromHash() {
+    var m = /[#&]c=(\d+)/.exec(location.hash || '');
+    if (!m) return 0;
+    var n = parseInt(m[1], 10) - 1;
+    return (n >= 0 && n < CHAPTERS.length) ? n : 0;
+  }
+
+  function renderChapters() {
+    if (!chapterHost) return;
+    chapterHost.innerHTML = '';
+    if (!CHAPTERS.length) { chapterSection.hidden = true; return; }
+    CHAPTERS.forEach(function (c, i) {
+      var a = document.createElement('a');
+      a.className = 'side-chapter';
+      a.href = '#c=' + (i + 1);
+      var label = c.title || ('第 ' + (i + 1) + ' 章');
+      a.textContent = (i + 1) + '. ' + label;
+      if (i === currentChapter) a.setAttribute('aria-current', 'page');
+      a.addEventListener('click', function (e) {
+        e.preventDefault();
+        goChapter(i);
+      });
+      chapterHost.appendChild(a);
+    });
+  }
+
+  function chapterPath(i) {
+    return 'chapters/' + key + '/' + CHAPTERS[i].file + '.md';
+  }
+
+  function renderChapterNav() {
+    var host = document.getElementById('chapter-nav');
+    if (!host) return;
+    host.innerHTML = '';
+    var prev = currentChapter > 0 ? currentChapter - 1 : null;
+    var next = currentChapter < CHAPTERS.length - 1 ? currentChapter + 1 : null;
+    if (prev === null && next === null) { host.hidden = true; return; }
+    host.hidden = false;
+    if (prev !== null) {
+      var p = document.createElement('a');
+      p.className = 'chapter-btn';
+      p.href = '#c=' + (prev + 1);
+      p.textContent = '← ' + (CHAPTERS[prev].title || '上一章');
+      p.addEventListener('click', function (e) { e.preventDefault(); goChapter(prev); });
+      host.appendChild(p);
+    }
+    if (next !== null) {
+      var n = document.createElement('a');
+      n.className = 'chapter-btn next';
+      n.href = '#c=' + (next + 1);
+      n.textContent = (CHAPTERS[next].title || '下一章') + ' →';
+      n.addEventListener('click', function (e) { e.preventDefault(); goChapter(next); });
+      host.appendChild(n);
+    }
+  }
+
+  function goChapter(i) {
+    if (i === currentChapter) return;
+    currentChapter = i;
+    if (history.replaceState) {
+      history.replaceState(null, '', '#c=' + (i + 1));
+    } else {
+      location.hash = 'c=' + (i + 1);
+    }
+    renderChapters();
+    renderChapterNav();
+    if (searchInput && searchInput.value) { searchInput.value = ''; }
+    window.scrollTo(0, 0);
+    loadChapter();
+  }
+
   /* ---------- markdown + math ---------- */
 
   var MATH_TOKEN = /@@VLMATH(\d+)@@/g;
@@ -355,16 +433,27 @@
 
   /* ---------- loading ---------- */
 
-  async function load() {
+  var sourceUrl = function () {
+    return CHAPTERS.length ? chapterPath(currentChapter) : part.md;
+  };
+
+  async function loadChapter() {
     if (!part) {
       article.innerHTML = '<div class="error">页面配置缺失：找不到 data-part 对应的分册。</div>';
       if (status) status.remove();
       return;
     }
+    var url = sourceUrl();
     try {
-      var res = await fetch(encodeURI(part.md));
+      var res = await fetch(encodeURI(url));
       if (!res.ok) throw new Error('Markdown 加载失败（HTTP ' + res.status + '）');
       var md = await res.text();
+      /* Chapter files reference ../../images/ so they resolve on GitHub; the
+         page lives at the site root, so rewrite them back. */
+      md = md.replace(/\.\.\/\.\.\/images\//g, 'images/');
+      /* The leading nav line is GitHub-only navigation; drop it from the page. */
+      md = md.replace(/^\[Previous\][^\n]*\n/, '');
+      md = md.replace(/\n---\n\n\[Previous\][^\n]*\s*$/, '');
       /* "\$$" occurs once in the source as an escaped delimiter artifact. */
       md = md.replace(/\\\$\$/g, '$$$$');
       var prepared = extractMath(md);
@@ -378,16 +467,21 @@
         a.setAttribute('target', '_blank');
         a.setAttribute('rel', 'noopener noreferrer');
       });
-      article.addEventListener('click', function (e) {
-        if (e.target.tagName === 'IMG' && !e.target.classList.contains('img-missing')) openLightbox(e.target);
-      });
+      renderChapterNav();
       hydrateMath();
     } catch (err) {
       article.innerHTML = '<div class="error">' + err.message +
         '<p>如果是双击打开的本文件，浏览器会阻止读取 Markdown。请在仓库根目录执行 <code>python -m http.server 8000</code>，再访问 <code>http://localhost:8000</code>。</p>' +
-        '<p><a href="' + encodeURI(part.md) + '">打开 Markdown 原文</a></p></div>';
+        '<p><a href="' + encodeURI(url) + '">打开本章 Markdown 原文</a></p></div>';
       if (status) status.remove();
     }
+  }
+
+  function load() {
+    currentChapter = chapterNumFromHash();
+    renderChapters();
+    renderChapterNav();
+    loadChapter();
   }
 
   /* ---------- wiring ---------- */
@@ -417,10 +511,24 @@
     }
   });
 
+  if (article) {
+    article.addEventListener('click', function (e) {
+      if (e.target.tagName === 'IMG' && !e.target.classList.contains('img-missing')) openLightbox(e.target);
+    });
+  }
+
   var menu = document.getElementById('menu');
   if (menu) menu.addEventListener('click', function () { sidebar.classList.toggle('open'); });
   if (toc) toc.addEventListener('click', function (e) {
     if (e.target.closest('a')) sidebar.classList.remove('open');
+  });
+  if (chapterHost) chapterHost.addEventListener('click', function (e) {
+    if (e.target.closest('a')) sidebar.classList.remove('open');
+  });
+
+  addEventListener('hashchange', function () {
+    var i = chapterNumFromHash();
+    if (i !== currentChapter) goChapter(i);
   });
 
   var progress = document.getElementById('progress');
