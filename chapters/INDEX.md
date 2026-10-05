@@ -44,9 +44,9 @@
 
 ## 视觉多模态项目
 
-- [`01-基础知识.md`](projects/01-基础知识.md) — 基础知识
-- [`02-VLM-后训练.md`](projects/02-VLM-后训练.md) — VLM 后训练
-- [`03-VLM-应用.md`](projects/03-VLM-应用.md) — VLM 应用
-- [`04-Diffusion.md`](projects/04-Diffusion.md) — Diffusion
-- [`05-统一理解生成.md`](projects/05-统一理解生成.md) — 统一理解生成
+- [`01-基础知识.md`](projects/01-基础知识.md) — 基础知识 · 含代码
+- [`02-VLM-后训练.md`](projects/02-VLM-后训练.md) — VLM 后训练 · 含代码
+- [`03-VLM-应用.md`](projects/03-VLM-应用.md) — VLM 应用 · 含代码
+- [`04-Diffusion.md`](projects/04-Diffusion.md) — Diffusion · 含代码
+- [`05-统一理解生成.md`](projects/05-统一理解生成.md) — 统一理解生成 · 含代码
 

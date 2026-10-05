@@ -221,6 +221,16 @@ button, input, select { font: inherit; }
   line-height: 1.45;
 }
 .side-chapter:hover { background: var(--accent-soft); color: var(--accent); text-decoration: none; }
+.side-chapter .code-badge {
+  float: right;
+  margin-left: 6px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--code);
+  color: var(--muted);
+  font: 10px var(--mono);
+  line-height: 1.5;
+}
 .side-chapter[aria-current="page"] {
   background: var(--accent-soft);
   border-left-color: var(--accent);

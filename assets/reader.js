@@ -74,6 +74,13 @@
       a.href = '#c=' + (i + 1);
       var label = c.title || ('第 ' + (i + 1) + ' 章');
       a.textContent = (i + 1) + '. ' + label;
+      if (c.code) {
+        var tag = document.createElement('span');
+        tag.className = 'code-badge';
+        tag.title = '这一节包含代码实现';
+        tag.textContent = '{ }';
+        a.appendChild(tag);
+      }
       if (i === currentChapter) a.setAttribute('aria-current', 'page');
       a.addEventListener('click', function (e) {
         e.preventDefault();

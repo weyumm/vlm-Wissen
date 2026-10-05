@@ -194,7 +194,8 @@ def split_part(part_key, src_md, page):
         print(f"  wrote chapters/{part_key}/{slug}.md ({len(body)} bytes) — {clean_title(title)[:40]}")
 
     clean_titles = [clean_title(t) for _, t, _ in chapters]
-    return [(c[0], t) for c, t in zip(chapters, clean_titles)]
+    flags = ["code" if "```" in b else "" for _, _, b in chapters]
+    return [(c[0], t, f) for c, t, f in zip(chapters, clean_titles, flags)]
 
 
 def write_chapters_js(summary):
@@ -205,9 +206,11 @@ def write_chapters_js(summary):
     buf.write("window.VLM_CHAPTERS = {\n")
     for part_key, chapters in summary.items():
         buf.write(f"  {part_key!r}: [\n")
-        for slug, title in chapters:
+        for entry in chapters:
+            slug, title = entry[0], entry[1]
+            has_code = len(entry) > 2 and entry[2] == "code"
             t = title.replace("\\", "\\\\").replace("'", "\\'")
-            buf.write(f"    {{ file: {slug!r}, title: '{t}' }},\n")
+            buf.write(f"    {{ file: {slug!r}, title: '{t}', code: {'true' if has_code else 'false'} }},\n")
         buf.write("  ],\n")
     buf.write("};\n")
     with io.open(path, "w", encoding="utf-8", newline="\n") as f:
@@ -223,8 +226,10 @@ def write_chapters_index(summary):
     for part_key, chapters in summary.items():
         title, page = parts_meta[part_key]
         buf.write(f"## {title}\n\n")
-        for slug, t in chapters:
-            buf.write(f"- [`{slug}.md`]({part_key}/{slug}.md) — {t}\n")
+        for entry in chapters:
+            slug, t = entry[0], entry[1]
+            mark = " · 含代码" if (len(entry) > 2 and entry[2] == "code") else ""
+            buf.write(f"- [`{slug}.md`]({part_key}/{slug}.md) — {t}{mark}\n")
         buf.write("\n")
     with io.open(path, "w", encoding="utf-8", newline="\n") as f:
         f.write(buf.getvalue())
