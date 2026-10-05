@@ -595,7 +595,7 @@ body.dark #article .math-fallback { color: #ff9b93; }
   font-size: 12px;
 }
 
-/* ---------- KaTeX tweaks ---------- */
+/* KaTeX tweaks ---------- */
 
 .katex-display {
   overflow-x: auto;
@@ -603,6 +603,27 @@ body.dark #article .math-fallback { color: #ff9b93; }
   padding: 2px 0;
 }
 .katex { font-size: 1.03em; }
+
+/* Un-rendered formula placeholder. Shows the raw TeX so nothing is blank,
+   and is swapped for real KaTeX as it approaches the viewport. */
+#article .vlm-math-pending {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: var(--code);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: .82em;
+  white-space: nowrap;
+}
+#article .vlm-math-pending.display {
+  display: block;
+  margin: 12px 0;
+  padding: 8px 12px;
+  text-align: center;
+  white-space: pre-wrap;
+}
 
 /* ---------- dark theme ---------- */
 

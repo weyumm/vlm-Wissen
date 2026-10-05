@@ -177,49 +177,90 @@
     return box;
   }
 
-  /* Replace placeholder text nodes with rendered math in chunks so the tab
-     stays responsive on documents with thousands of formulas. */
+  /* Formulas are rendered LAZILY: the placeholder is swapped for a small span
+     holding the raw TeX at insert time, and KaTeX only runs when the span
+     approaches the viewport. A chapter with a thousand formulas therefore
+     paints instantly and only pays for the ones actually read. */
+  var mathObserver = null;
+
+  function renderPending(el) {
+    var span = mathSpans[parseInt(el.getAttribute('data-mi'), 10)];
+    if (!span) { el.remove(); return; }
+    el.innerHTML = katex.renderToString(span.tex, {
+      displayMode: span.display,
+      throwOnError: false,
+      strict: false
+    });
+    el.classList.remove('vlm-math-pending');
+    el.removeAttribute('data-mi');
+  }
+
   function hydrateMath() {
+    if (mathObserver) { mathObserver.disconnect(); mathObserver = null; }
     var walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
     var targets = [];
     while (walker.nextNode()) {
       if (walker.currentNode.nodeValue.indexOf('@@VLMATH') >= 0) targets.push(walker.currentNode);
     }
-    var total = mathSpans.length;
-    var rendered = 0;
-    var idx = 0;
+    var pending = [];
 
-    function step() {
-      var stop = Math.min(targets.length, idx + 60);
-      while (idx < stop) {
-        var node = targets[idx++];
-        var frag = document.createDocumentFragment();
-        var value = node.nodeValue;
-        var last = 0;
-        var m;
-        MATH_TOKEN.lastIndex = 0;
-        while ((m = MATH_TOKEN.exec(value)) !== null) {
-          if (m.index > last) frag.appendChild(document.createTextNode(value.slice(last, m.index)));
-          var span = mathSpans[parseInt(m[1], 10)];
-          if (span) { frag.appendChild(katexNode(span)); rendered++; }
-          last = m.index + m[0].length;
+    for (var t = 0; t < targets.length; t++) {
+      var node = targets[t];
+      var frag = document.createDocumentFragment();
+      var value = node.nodeValue;
+      var last = 0;
+      var m;
+      MATH_TOKEN.lastIndex = 0;
+      while ((m = MATH_TOKEN.exec(value)) !== null) {
+        if (m.index > last) frag.appendChild(document.createTextNode(value.slice(last, m.index)));
+        var idx = parseInt(m[1], 10);
+        var span = mathSpans[idx];
+        if (span) {
+          var ph = document.createElement('span');
+          ph.className = 'vlm-math-pending' + (span.display ? ' display' : '');
+          ph.setAttribute('data-mi', String(idx));
+          ph.textContent = span.tex;
+          frag.appendChild(ph);
+          pending.push(ph);
         }
-        if (last < value.length) frag.appendChild(document.createTextNode(value.slice(last)));
-        if (node.parentNode) node.parentNode.replaceChild(frag, node);
+        last = m.index + m[0].length;
       }
-      if (status) status.textContent = '正在渲染公式… ' + rendered + ' / ' + total;
-      if (idx < targets.length) { setTimeout(step, 0); } else { finish(); }
+      if (last < value.length) frag.appendChild(document.createTextNode(value.slice(last)));
+      if (node.parentNode) node.parentNode.replaceChild(frag, node);
     }
 
-    function finish() {
-      if (status) status.remove();
-      buildToc();
-      observe();
-      if (window.VLMTheme) window.VLMTheme.index(article);
+    if (!pending.length) return;
+    if (!('IntersectionObserver' in window)) {
+      pending.forEach(renderPending);
+      return;
     }
+    mathObserver = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (!entries[i].isIntersecting) continue;
+        mathObserver.unobserve(entries[i].target);
+        renderPending(entries[i].target);
+      }
+    }, { rootMargin: '400px 0px' });
+    pending.forEach(function (el) { mathObserver.observe(el); });
 
-    if (!targets.length) { finish(); return; }
-    step();
+    /* Safety net: drain whatever the observer has not reached yet in small
+       idle batches, so a very fast scroll or a Ctrl+F still ends up with
+       every formula typeset — without ever blocking the first paint. */
+    var queue = pending.slice();
+    var drain = function () {
+      if (!queue.length) return;
+      var stop = Math.min(queue.length, 50);
+      for (var k = 0; k < stop; k++) {
+        var el = queue[k];
+        if (el.isConnected && el.classList.contains('vlm-math-pending')) renderPending(el);
+      }
+      queue.splice(0, stop);
+      if (queue.length) {
+        if (window.requestIdleCallback) requestIdleCallback(drain, { timeout: 2000 });
+        else setTimeout(drain, 250);
+      }
+    };
+    setTimeout(drain, 1500);
   }
 
   /* ---------- images ---------- */
@@ -462,6 +503,11 @@
       }
       marked.setOptions({ gfm: true, breaks: false });
       article.innerHTML = DOMPurify.sanitize(marked.parse(prepared), { ADD_ATTR: ['style', 'target'] });
+      /* The document is on screen now; formulas fill in as they scroll. */
+      if (status) status.remove();
+      buildToc();
+      observe();
+      if (window.VLMTheme) window.VLMTheme.index(article);
       tuneImages();
       Array.prototype.forEach.call(article.querySelectorAll('a[href^="http"]'), function (a) {
         a.setAttribute('target', '_blank');
@@ -469,12 +515,20 @@
       });
       renderChapterNav();
       hydrateMath();
+      prefetchNext();
     } catch (err) {
       article.innerHTML = '<div class="error">' + err.message +
         '<p>如果是双击打开的本文件，浏览器会阻止读取 Markdown。请在仓库根目录执行 <code>python -m http.server 8000</code>，再访问 <code>http://localhost:8000</code>。</p>' +
         '<p><a href="' + encodeURI(url) + '">打开本章 Markdown 原文</a></p></div>';
       if (status) status.remove();
     }
+  }
+
+  /* Warm the browser cache for the next chapter so flipping forward is instant. */
+  function prefetchNext() {
+    var next = currentChapter + 1;
+    if (next >= CHAPTERS.length || !window.fetch) return;
+    setTimeout(function () { fetch(encodeURI(chapterPath(next))).catch(function () {}); }, 2500);
   }
 
   function load() {

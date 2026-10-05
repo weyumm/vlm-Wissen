@@ -19,6 +19,15 @@ import os, re, io, json
 
 REPO = r"D:\同车行与大数据\多模态知识库\vlm-Wissen"
 
+H1_RE = re.compile(r"^# (?!#)(.+?)$")
+H2_RE = re.compile(r"^## (?!#)(.+?)$")
+
+# A chapter larger than SPLIT_KB is divided along its H2 headings; a
+# sub-section smaller than MERGE_KB is folded into its neighbour so we do not
+# ship one-paragraph files.
+SPLIT_KB = 110
+MERGE_KB = 8
+
 PARTS = [
     ("lecture-1",  "视觉多模态讲义（上）.md", "lecture-1",  "lecture-1.html"),
     ("lecture-2",  "视觉多模态讲义（下）.md", "lecture-2",  "lecture-2.html"),
@@ -27,19 +36,26 @@ PARTS = [
 ]
 
 
-def h1_positions_outside_code(text):
-    """Char offsets of H1 lines that are NOT inside fenced code blocks."""
+def headings_outside_code(text, rx):
+    """(offset, title) pairs for headings matching rx, skipping fenced code."""
     lines = text.split("\n")
-    positions = []
+    out = []
     in_code = False
     pos = 0
     for ln in lines:
         if ln.lstrip().startswith("```"):
             in_code = not in_code
-        elif not in_code and re.match(r"^# (?!#)(.+?)$", ln):
-            positions.append(pos)
+        elif not in_code:
+            m = rx.match(ln)
+            if m:
+                out.append((pos, m.group(1).strip()))
         pos += len(ln) + 1
-    return positions
+    return out
+
+
+def h1_positions_outside_code(text):
+    """Char offsets of H1 lines that are NOT inside fenced code blocks."""
+    return [p for p, _ in headings_outside_code(text, H1_RE)]
 
 
 def split_h1(text):
@@ -54,6 +70,25 @@ def split_h1(text):
         head = re.search(r"(?m)^# (.+?)$", text[start:end])
         title = head.group(1).strip() if head else ""
         yield (title, text[start:end])
+
+
+def split_h2(body):
+    """Split a chunk along its H2 headings; the leading piece (which holds the
+    H1 line itself) is folded into the first H2 section."""
+    hits = headings_outside_code(body, H2_RE)
+    if not hits:
+        return [body]
+    pieces = []
+    if hits[0][0] > 0:
+        pieces.append(body[:hits[0][0]])
+    for i, (start, _) in enumerate(hits):
+        end = hits[i + 1][0] if i + 1 < len(hits) else len(body)
+        pieces.append(body[start:end])
+    # fold the H1-only lead-in into the first real section
+    if len(pieces) > 1:
+        pieces[1] = pieces[0] + pieces[1]
+        pieces = pieces[1:]
+    return pieces
 
 
 def unescape(s):
@@ -110,11 +145,42 @@ def split_part(part_key, src_md, page):
         sections = sections[1:]
 
     for i, (title, body) in enumerate(sections):
-        idx = i + 1
-        slug = f"{idx:02d}-{slug_for(title, 'chapter')}"
         if i == 0 and preamble:
             body = preamble + "\n\n" + body
-        chapters.append((slug, title, body))
+        parent = clean_title(title)
+        if len(body) <= SPLIT_KB * 1024:
+            chunks = [(title, body)]
+        else:
+            pieces = split_h2(body)
+            # (h2 raw title, text); the first piece carries the H1 line
+            merged = []
+            for j, piece in enumerate(pieces):
+                hit = re.search(r"(?m)^## (?!#)(.+?)$", piece)
+                sub = hit.group(1).strip() if hit else ""
+                if merged and len(piece) < MERGE_KB * 1024:
+                    merged[-1][1] += piece
+                elif merged and len(merged[-1][1]) < MERGE_KB * 1024:
+                    merged[-1][1] += piece
+                    merged[-1][0] = sub or merged[-1][0]
+                else:
+                    merged.append([sub, piece])
+            chunks = []
+            for sub, piece in merged:
+                label = parent + " · " + clean_title(sub) if sub else parent
+                chunks.append((label, piece))
+        for chunk_title, chunk_body in chunks:
+            chapters.append([chunk_title, chunk_body])
+
+    # Number slugs sequentially and keep them unique.
+    used = set()
+    for i, ch in enumerate(chapters):
+        slug = f"{i + 1:02d}-{slug_for(ch[0], 'chapter')}"
+        n = 2
+        while slug in used:
+            slug = f"{i + 1:02d}-{slug_for(ch[0], 'chapter')}-{n}"
+            n += 1
+        used.add(slug)
+        ch.insert(0, slug)
 
     for i, (slug, title, body) in enumerate(chapters):
         prev_slug = chapters[i - 1][0] if i > 0 else None
@@ -125,7 +191,7 @@ def split_part(part_key, src_md, page):
         path = os.path.join(out_dir, slug + ".md")
         with io.open(path, "w", encoding="utf-8", newline="\n") as f:
             f.write(out)
-        print(f"  wrote chapters/{part_key}/{slug}.md ({len(body)} bytes) — {title[:40]}")
+        print(f"  wrote chapters/{part_key}/{slug}.md ({len(body)} bytes) — {clean_title(title)[:40]}")
 
     clean_titles = [clean_title(t) for _, t, _ in chapters]
     return [(c[0], t) for c, t in zip(chapters, clean_titles)]
