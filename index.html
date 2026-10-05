@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f8">
+  <meta name="description" content="视觉多模态知识库：视觉基础与 Vision-Language Model 中文讲义、面试题与项目实战，共四个分册，支持目录、全文搜索与公式渲染。">
+  <title>视觉多模态知识库 · VLM Wissen</title>
+  <link rel="stylesheet" href="assets/site.css">
+  <script defer src="assets/parts.js"></script>
+  <script defer src="assets/theme.js"></script>
+  <script defer src="assets/hub.js"></script>
+</head>
+<body>
+<script>try{if(localStorage.getItem('vlm-theme')==='dark')document.body.classList.add('dark')}catch(e){}</script>
+  <header class="topbar">
+    <a class="brand" href="index.html"><span class="brand-mark">V</span><span>VLM Wissen<small>Multimodal notes</small></span></a>
+    <div class="top-spacer"></div>
+    <a class="pill" href="https://github.com/weyumm/vlm-Wissen" rel="noopener noreferrer" target="_blank" style="padding:6px 12px">GitHub 仓库</a>
+    <button class="icon-btn" id="theme" aria-label="切换深色模式" title="切换深色模式"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M20.2 15.2A8.4 8.4 0 0 1 8.8 3.8 8.4 8.4 0 1 0 20.2 15.2Z"/></svg></button>
+  </header>
+
+  <div class="layout hub-layout">
+    <main>
+      <section class="hero">
+        <div class="eyebrow">视觉 × 语言 · 中文知识库</div>
+        <h1>视觉多模态知识库</h1>
+        <p>围绕视觉基础与 Vision-Language Model 的四册中文笔记：讲义分上下两册打底，面试题用于查漏，项目实战用于落地。每个分册是独立页面，配有章节目录、全文搜索、公式渲染与深色模式。</p>
+        <div class="hero-meta">
+          <span class="pill">4 个分册</span>
+          <span class="pill">17 章</span>
+          <span class="pill">690 张配图</span>
+          <span class="pill">LaTeX 公式</span>
+          <span class="pill">无需联网</span>
+        </div>
+      </section>
+
+      <p class="hub-intro">选择一个分册开始阅读。四册彼此独立加载，浏览器同一时间只需要处理其中一册的内容。</p>
+
+      <div class="card-grid" id="card-grid"></div>
+
+      <div class="hub-note">
+        全部内容由仓库中的 Markdown 原文在浏览器内渲染，图片与公式均为本地资源，不依赖任何 CDN。
+        想离线使用或二次编辑，直接取根目录下的 <code>.md</code> 文件即可。
+      </div>
+
+      <footer class="footer">VLM Wissen · 视觉多模态学习笔记 · <a href="https://github.com/weyumm/vlm-Wissen" rel="noopener noreferrer" target="_blank">GitHub</a></footer>
+    </main>
+  </div>
+</body>
+</html>
