@@ -195,6 +195,40 @@
     });
   }
 
+  /* Local figures become <img> placeholders with no src, so nothing is fetched
+     until tuneImages promotes it. External images are left untouched. */
+  function extractImages(md) {
+    return md.replace(/!\[([^\]]*)\]\(([^)\s]+)(?:\s+&quot;[^&]*&quot;|\s+"[^"]*")?\)/g,
+      function (m, alt, src) {
+        if (/^(https?:)?\/\//i.test(src)) return m;
+        return '<img class="vlm-img-pending" decoding="async" alt="' +
+          escapeHtml(alt || '讲义配图') + '" data-src="' + escapeHtml(src) + '">';
+      });
+  }
+
+  /* Split sanitized HTML at top-level element boundaries so it can be inserted
+     in chunks across frames instead of one giant innerHTML parse. */
+  function splitTopLevel(html) {
+    var parts = [];
+    var depth = 0;
+    var last = 0;
+    var voidEls = { hr: 1, img: 1, br: 1, input: 1, source: 1 };
+    var m;
+    var tagRe = /<(\/?)([a-zA-Z][a-zA-Z0-9]*)((?:"[^"]*"|'[^']*'|[^"'>])*)>/g;
+    while ((m = tagRe.exec(html))) {
+      var tag = m[2].toLowerCase();
+      if (voidEls[tag] || /\/>$/.test(m[0])) continue;
+      if (m[1]) depth = Math.max(0, depth - 1);
+      else depth++;
+      if (depth === 0) {
+        parts.push(html.slice(last, tagRe.lastIndex));
+        last = tagRe.lastIndex;
+      }
+    }
+    if (last < html.length) parts.push(html.slice(last));
+    return parts;
+  }
+
   function katexNode(span) {
     var box = document.createElement('span');
     try {
@@ -283,26 +317,30 @@
      typesets a small batch so no single frame blocks for long. */
   var mathQueue = [];
   var mathFlushing = false;
+  var codeIO = null;
 
   function enqueueMath(el) {
     if (!el || !el.classList || !el.classList.contains('vlm-math-pending')) return;
     mathQueue.push(el);
     if (!mathFlushing) {
       mathFlushing = true;
-      (window.requestAnimationFrame || setTimeout)(flushMath, 0);
+      /* setTimeout rather than rAF: rAF is throttled to zero in background
+         tabs, which would leave formulas unrendered after a fast scroll. */
+      setTimeout(flushMath, 0);
     }
   }
 
   function flushMath() {
-    var budget = 10;
-    var n = 0;
-    while (mathQueue.length && n < budget) {
+    /* Time-budgeted: complex formulas cost far more than simple ones, so
+       render until the frame budget is spent rather than a fixed count. */
+    var start = performance.now();
+    while (mathQueue.length) {
       var el = mathQueue.shift();
       if (el.isConnected && el.classList.contains('vlm-math-pending')) renderPending(el);
-      n++;
+      if (performance.now() - start > 14) break;
     }
     if (mathQueue.length) {
-      (window.requestAnimationFrame || setTimeout)(flushMath, 0);
+      setTimeout(flushMath, 16);
     } else {
       mathFlushing = false;
     }
@@ -514,10 +552,12 @@
     node.appendChild(pre);
   }
 
-  /* Frames are built only as they approach the viewport. A chapter with 100+
+  /* Build the frames only as they approach the viewport. A chapter with 100+
      blocks would otherwise spend hundreds of ms in one synchronous pass — the
-     stutter that was reported. */
+     stutter that was reported. A settle timer backfills anything a fast scroll
+     jumped past, so every frame is eventually built. */
   function enhanceCodeBlocks() {
+    if (codeIO) { codeIO.disconnect(); codeIO = null; }
     var targets = Array.prototype.slice.call(article.querySelectorAll('.code-pending, pre'))
       .filter(function (el) { return !el.closest('.code-block'); });
     if (!targets.length) return;
@@ -528,21 +568,46 @@
       targets.forEach(upgrade);
       return;
     }
-    var io = new IntersectionObserver(function (entries) {
+    codeIO = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
         if (!entries[i].isIntersecting) continue;
-        io.unobserve(entries[i].target);
+        codeIO.unobserve(entries[i].target);
         upgrade(entries[i].target);
       }
     }, { rootMargin: '600px 0px' });
-    targets.forEach(function (el) { io.observe(el); });
+    targets.forEach(function (el) { codeIO.observe(el); });
+
+    /* Backfill anything a fast scroll jumped past, a small batch at a time, so
+       every frame is eventually built without one long task. */
+    var backfill = function () {
+      var step = function () {
+        var n = 0;
+        while (n < 15) {
+          var el = article.querySelector('.code-pending');
+          if (!el) { if (codeIO) { codeIO.disconnect(); codeIO = null; } return; }
+          upgrade(el);
+          n++;
+        }
+        setTimeout(step, 40);
+      };
+      step();
+    };
+    if (!enhanceCodeBlocks._scrollWired) {
+      enhanceCodeBlocks._scrollWired = true;
+      var settleTimer = null;
+      addEventListener('scroll', function () {
+        clearTimeout(settleTimer);
+        settleTimer = setTimeout(backfill, 1500);
+      }, { passive: true });
+    }
+    enhanceCodeBlocks._t = setTimeout(backfill, 4000);
   }
 
   /* Images go through a small queue. Decoding a dozen full-width figures at the
      same time is what made scrolling stutter, so at most a few load at once and
      everything below the fold waits until it is nearly on screen. */
   function tuneImages() {
-    var imgs = article.querySelectorAll('img');
+    var imgs = article.querySelectorAll('img.vlm-img-pending');
     if (!imgs.length) return;
     var EAGER = 4;          /* above-the-fold figures load right away */
     var MAX_PARALLEL = 2;   /* decode at most this many at a time */
@@ -571,26 +636,18 @@
       }
     }
 
-    for (var i = 0; i < imgs.length; i++) {
-      var img = imgs[i];
-      img.decoding = 'async';
-      if (!img.getAttribute('alt')) img.setAttribute('alt', '讲义配图');
-      if (img.complete && img.naturalWidth) {
-        img.classList.add('img-ready');
-        continue;
-      }
-      if (i < EAGER) {
-        /* keep the real src; just mark it once it has painted */
-        img.addEventListener('load', function () { this.classList.add('img-ready'); }, { once: true });
-        img.addEventListener('error', function () {
-          this.classList.add('img-missing', 'img-ready');
-        }, { once: true });
-      } else {
-        img.setAttribute('data-src', img.getAttribute('src') || '');
-        img.removeAttribute('src');
-        deferred.push(img);
-      }
-    }
+    var eager = Array.prototype.slice.call(imgs, 0, EAGER);
+    var deferred = Array.prototype.slice.call(imgs, EAGER);
+
+    eager.forEach(function (img) {
+      var settle = function () { img.classList.add('img-ready'); };
+      img.addEventListener('load', settle, { once: true });
+      img.addEventListener('error', function () {
+        img.classList.add('img-missing', 'img-ready');
+      }, { once: true });
+      img.src = img.getAttribute('data-src');
+      img.removeAttribute('data-src');
+    });
 
     if (!deferred.length) return;
     if (!('IntersectionObserver' in window)) {
@@ -815,9 +872,60 @@
 
   /* ---------- loading ---------- */
 
+  var renderGen = 0;   /* guards chunked rendering against chapter switches */
+
   var sourceUrl = function () {
     return CHAPTERS.length ? chapterPath(currentChapter) : part.md;
   };
+
+  /* Insert the rendered chapter a few top-level blocks per frame. Parsing the
+     whole chapter in one innerHTML call was a ~300ms long task on the heaviest
+     chapters; spread across frames it never blocks. */
+  function renderChunks(html, gen) {
+    var parts = splitTopLevel(html);
+    var chunks = [];
+    for (var i = 0; i < parts.length; i += 30) {
+      chunks.push(parts.slice(i, i + 30).join(''));
+    }
+    var idx = 0;
+    var step = function () {
+      if (gen !== renderGen) return;   /* user switched chapters mid-render */
+      if (idx < chunks.length) {
+        article.insertAdjacentHTML('beforeend', chunks[idx++]);
+        if (status && idx === 1) status.remove();
+        setTimeout(step, 0);
+        return;
+      }
+      finishRender(gen);
+    };
+    step();
+  }
+
+  function finishRender(gen) {
+    if (gen !== renderGen) return;
+    if (status) status.remove();
+    buildToc();
+    observe();
+    document.body.setAttribute('data-rendered', '1');
+    if (window.VLMTheme) window.VLMTheme.index(article);
+    tuneImages();
+    renderChapterNav();
+    hydrateMath();
+    prefetchNext();
+    /* Purely cosmetic passes run a frame later so the first paint is not
+       blocked behind them on the heaviest chapters. */
+    setTimeout(function () {
+      if (gen !== renderGen) return;
+      enhanceCallouts();
+      enhanceCodeBlocks();
+      enhanceSemanticColors();
+      enhanceHighlightRows();
+      Array.prototype.forEach.call(article.querySelectorAll('a[href^="http"]'), function (a) {
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+      });
+    }, 0);
+  }
 
   async function loadChapter() {
     if (!part) {
@@ -825,9 +933,12 @@
       if (status) status.remove();
       return;
     }
+    var gen = ++renderGen;
+    document.body.removeAttribute('data-rendered');
     var url = sourceUrl();
     try {
       var res = await fetch(encodeURI(url));
+      if (gen !== renderGen) return;   /* superseded while fetching */
       if (!res.ok) throw new Error('Markdown 加载失败（HTTP ' + res.status + '）');
       var md = await res.text();
       /* Chapter files reference ../../images/ so they resolve on GitHub; the
@@ -838,32 +949,21 @@
       md = md.replace(/\n---\n\n\[Previous\][^\n]*\s*$/, '');
       /* "\$$" occurs once in the source as an escaped delimiter artifact. */
       md = md.replace(/\\\$\$/g, '$$$$');
-      /* Pull code blocks out first so their text never reaches innerHTML, then
-         wrap the remaining formulas in placeholder spans. */
-      var prepared = extractMath(extractCode(md));
+      /* Order matters: code first (its text never reaches innerHTML), then
+         figures (placeholders without src), then formulas (TeX placeholder
+         spans). */
+      md = extractCode(md);
+      md = extractImages(md);
+      var prepared = extractMath(md);
       if (!window.marked || !window.DOMPurify || !window.katex) {
         throw new Error('渲染组件未载入，请确认 assets/vendor 下的脚本可以访问。');
       }
       marked.setOptions({ gfm: true, breaks: false });
-      article.innerHTML = DOMPurify.sanitize(marked.parse(prepared), { ADD_ATTR: ['style', 'target'] });
-      /* The document is on screen now; formulas fill in as they scroll. */
-      if (status) status.remove();
-      buildToc();
-      observe();
-      if (window.VLMTheme) window.VLMTheme.index(article);
-      tuneImages();
-      enhanceCallouts();
-      enhanceCodeBlocks();
-      enhanceSemanticColors();
-      enhanceHighlightRows();
-      Array.prototype.forEach.call(article.querySelectorAll('a[href^="http"]'), function (a) {
-        a.setAttribute('target', '_blank');
-        a.setAttribute('rel', 'noopener noreferrer');
-      });
-      renderChapterNav();
-      hydrateMath();
-      prefetchNext();
+      article.innerHTML = '';
+      var html = DOMPurify.sanitize(marked.parse(prepared), { ADD_ATTR: ['style', 'target'] });
+      renderChunks(html, gen);
     } catch (err) {
+      if (gen !== renderGen) return;
       article.innerHTML = '<div class="error">' + err.message +
         '<p>如果是双击打开的本文件，浏览器会阻止读取 Markdown。请在仓库根目录执行 <code>python -m http.server 8000</code>，再访问 <code>http://localhost:8000</code>。</p>' +
         '<p><a href="' + encodeURI(url) + '">打开本章 Markdown 原文</a></p></div>';
