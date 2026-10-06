@@ -127,8 +127,7 @@ LeNet 由 **Yann LeCun** 于 1998 年在 **AT\&T** 贝尔实验室提出，最�
 以下是一个简单的基于 PyTorch 的 LeNet实现：
 
 ```python
-LeNet-5
-Pythonimport torch
+import torch
 import torch.nn as nn
 import torch.nn.functional as F
 

@@ -21,8 +21,7 @@
 `project.json` 保存模型 revision、数据快照、训练配置、预测文件和评测报告路径。一次实验对应一份配置指纹，训练和推理都从这份文件取版本。
 
 ```text
-project.json：实验清单
-JSON{
+{
   "project_id": "vlm-understanding-sft",
   "model": {"id": "Qwen/Qwen3-VL-4B-Instruct", "revision": "resolved_commit_sha"},
   "dataset": {
@@ -68,8 +67,7 @@ JSON{
 训练前先固定机器可校验的输出合同。`product_type` 看不清时写 `unknown`；颜色或材质看不清时使用空数组；没有区域标注时采用 `image-level` 证据并令 `bbox=null`。每个非空字段都指向输入图片索引。必需字段明确且证据完整时返回 `accept`，语义不确定时返回 `review`，JSON、枚举或证据索引错误时返回 `reject`。
 
 ```text
-schema_example.json：输出样例
-JSON{
+{
   "schema_version": "1.0",
   "product_type": "chair",
   "attributes": {
@@ -139,8 +137,7 @@ ABO 有 147,702 个商品和 398,212 张目录图，同一商品通常包含主�
 > 5. **<span style="color: rgb(36,91,219); background-color: inherit">审计层</span>**：输出接受、拒绝和待复核计数，保存数据快照、split salt 与构建脚本 commit。
 
 ```python
-provenance.py：媒体校验
-Pythonimport hashlib
+import hashlib
 from pathlib import Path
 from typing import Any
 
@@ -240,14 +237,9 @@ JSON
 训练记录除了 LLaMA-Factory 消费的 messages 和 images，还保留 sample\_id、group\_id、split、media\_sha256、source 与 review\_required。这些额外字段供项目校验和审计使用，不改变模型看到的消息内容。
 
 ```text
-train.jsonl：训练样例
-JSON{"sample_id":"demo_train_001","group_id":"product_demo_001","split":"train","images":["sample/assets/demo_product.ppm"],"media_sha256":["bfb01feb120b746a4e277cf1f4dadd71b3bdb58c05e9e2df1877910cd6ae6a9b"],"messages":[{"role":"user","content":"<image>\n只根据图片提取商品类型、颜色、材质和可见文字。无法从图中确认的字段使用空数组；不要根据常识补写。严格按 vlm_product.schema.v1 输出 JSON。"},{"role":"assistant","content":"{\"schema_version\":\"1.0\",\"product_type\":\"unknown\",\"attributes\":{\"color\":[\"black\",\"white\"],\"material\":[]},\"visible_text\":[],\"evidence\":[{\"field\":\"attributes.color\",\"media_index\":0,\"support\":\"image_level\"}],\"decision\":\"review\"}"}],"source":{"dataset":"synthetic_format_demo","snapshot_id":"demo-v1","license_id":"CC0-1.0","source_uri":"local-generated"},"review_required":false}
-```
-
-
-```json
 {"sample_id":"demo_train_001","group_id":"product_demo_001","split":"train","images":["sample/assets/demo_product.ppm"],"media_sha256":["bfb01feb120b746a4e277cf1f4dadd71b3bdb58c05e9e2df1877910cd6ae6a9b"],"messages":[{"role":"user","content":"<image>\n只根据图片提取商品类型、颜色、材质和可见文字。无法从图中确认的字段使用空数组；不要根据常识补写。严格按 vlm_product.schema.v1 输出 JSON。"},{"role":"assistant","content":"{\"schema_version\":\"1.0\",\"product_type\":\"unknown\",\"attributes\":{\"color\":[\"black\",\"white\"],\"material\":[]},\"visible_text\":[],\"evidence\":[{\"field\":\"attributes.color\",\"media_index\":0,\"support\":\"image_level\"}],\"decision\":\"review\"}"}],"source":{"dataset":"synthetic_format_demo","snapshot_id":"demo-v1","license_id":"CC0-1.0","source_uri":"local-generated"},"review_required":false}
 ```
+
 
 > ✅ **<span style="color: rgb(36,91,219); background-color: inherit">校验门禁</span>**
 >
@@ -265,8 +257,7 @@ JSON{"sample_id":"demo_train_001","group_id":"product_demo_001","split":"train",
 | 评测                                                                             | 冻结测试集与同一评测代码                                                                                  | 逐样本预测与聚合报告                                                                     | 无                                                                             |
 
 ```python
-qwen3vl_adapter.py：基线适配器
-Pythonfrom dataclasses import dataclass
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -451,8 +442,7 @@ CIDEr 计算 Caption 相似度，POPE 检查对象存在性幻觉；商品测试
 | 系统   | TTFT、P50/P95、吞吐、显存、失败率                                                       | 图片数量、像素、并发、输出长度                                                              | `load_test.json`                                                               |
 
 ```python
-evaluation.py：离线评测
-Pythonfrom collections import Counter
+from collections import Counter
 from typing import Any, Iterable
 
 from .contracts import validate_prediction
@@ -571,8 +561,7 @@ def evaluate_records(
 vLLM 负责底座与 LoRA 推理，应用层处理请求大小、图片数量、JSON 提取、Schema、证据、复核路由和审计日志。服务固定 `vLLM>=0.11.0`，启动参数显式传入模型 revision 与 adapter 路径，每个请求最多四张图片并关闭视频输入。
 
 ```text
-vllm_serve.sh：服务启动
-Bash#!/usr/bin/env bash
+#!/usr/bin/env bash
 set -euo pipefail
 
 : "${MODEL_REVISION:?Set MODEL_REVISION to a reviewed immutable commit}"
@@ -596,8 +585,7 @@ vllm serve Qwen/Qwen3-VL-4B-Instruct \
 模型返回后，业务层再次校验。格式或证据非法直接拒绝；模型主动 review/reject 进入人工队列；只有合法 accept 才能自动写库。
 
 ```python
-service.py：失败路由
-Pythonfrom dataclasses import dataclass
+from dataclasses import dataclass
 from typing import Any
 
 from .contracts import validate_prediction
@@ -694,20 +682,6 @@ def route_prediction(prediction: dict[str, Any], media_count: int) -> RouteResul
 | `service.py`                                                                 | 组合模型、策略和人工复核                                                                   | 模型 confidence 不直接决定放行                                                          |
 
 ```text
-project.json：训练与评测清单
-JSON{
-  "project_id": "product-audit-sft-grpo",
-  "model": {"id": "Qwen/Qwen3-VL-4B-Instruct", "revision": "resolved_commit_sha"},
-  "data": {"snapshot": "audit_v3", "split_key": "group_id", "policy_version": "policy_2026_07"},
-  "sft": {"trainer": "TRL SFTTrainer", "adapter": "PEFT LoRA", "config": "configs/sft.yaml"},
-  "grpo": {"trainer": "TRL GRPOTrainer", "reward": ["schema", "risk", "evidence", "policy"]},
-  "evaluation": {"predictions": "artifacts/test_predictions.jsonl", "report": "artifacts/audit_report.json"},
-  "serving": {"engine": "vLLM", "gate": "hard_policy", "fallback": "manual_review"}
-}
-```
-
-
-```json
 {
   "project_id": "product-audit-sft-grpo",
   "model": {"id": "Qwen/Qwen3-VL-4B-Instruct", "revision": "resolved_commit_sha"},
@@ -718,6 +692,7 @@ JSON{
   "serving": {"engine": "vLLM", "gate": "hard_policy", "fallback": "manual_review"}
 }
 ```
+
 
 ### 2.2.2 <span style="color: rgb(36,91,219); background-color: inherit">审核协议</span>
 
