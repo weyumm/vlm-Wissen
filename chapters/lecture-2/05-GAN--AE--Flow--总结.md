@@ -6,9 +6,9 @@
 
 假设有一批大小为$$N$$的真实图片数据集合，$$S_x=\{x_1, x_2, \cdots, x_N\}$$
 
-> * 如果有一个完美的分布$$p(x)$$能生成集合$$S_x$$中的元素，就意味着要求每次采样出来的$$x' \sim p(x)$$都满足$$x' \in S_x$$
+> ✏️ * 如果有一个完美的分布$$p(x)$$能生成集合$$S_x$$中的元素，就意味着要求每次采样出来的$$x' \sim p(x)$$都满足$$x' \in S_x$$
 >
-> * 当集合元素$$N$$比较小的时候，$$p(x)$$可以强行背下来即可；但是<span style="color: rgb(216,57,49); background-color: inherit">当</span>$$N$$<span style="color: rgb(216,57,49); background-color: inherit">变得非常大的时候，完美分布</span>$$p(x)$$<span style="color: rgb(216,57,49); background-color: inherit">就几乎不可能获取了</span>
+> ✏️ * 当集合元素$$N$$比较小的时候，$$p(x)$$可以强行背下来即可；但是<span style="color: rgb(216,57,49); background-color: inherit">当</span>$$N$$<span style="color: rgb(216,57,49); background-color: inherit">变得非常大的时候，完美分布</span>$$p(x)$$<span style="color: rgb(216,57,49); background-color: inherit">就几乎不可能获取了</span>
 
 而 AIGC 的任务就是逼近这个完美分布$$p(x)$$，这里的$$x$$可以是图像，可以是视频，可以是音频等。那具体如何逼近这个完美分布$$p(x)$$呢？主要有以下几种方法：
 
@@ -26,7 +26,7 @@ $$(\hat{\mu}, \hat{\Sigma})=\hat{\theta}=\text{argmax}_\theta L_\theta(S_x)=\tex
 
 这样就求得了$$p(x)$$的分布为$$\mathcal{N}(\hat{\mu}, \hat{\Sigma})$$。这样做简单直观，但是弊端也很明显：
 
-> * **$$p(x)$$<span style="color: rgb(36,91,219); background-color: inherit">形式未知</span>**：需要丰富的领域知识才能笃定$$p(x)$$就是某个形式，其实对于复杂问题来说没人知道分布的参数化表达式是啥
+> 🍰 * **$$p(x)$$<span style="color: rgb(36,91,219); background-color: inherit">形式未知</span>**：需要丰富的领域知识才能笃定$$p(x)$$就是某个形式，其实对于复杂问题来说没人知道分布的参数化表达式是啥
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">参数量</span>$$\theta$$<span style="color: rgb(36,91,219); background-color: inherit">的空间太大</span>**：多元高斯分布的维度跟图片像素数一样大，例如 ImageNet 是$$\mathbb{R}^{3 \times 224 \times 224}$$维度，那么意味着&#x662F;**`150528`**&#x5143;高斯分布，那需要海量的数据才能估计得准确
 
@@ -54,11 +54,11 @@ $$p(x)=\int p(x|z) p(z) \text{d}z$$
 >
 >   * **<span style="color: rgb(36,91,219); background-color: inherit">Step 1</span>**: 假设想得到$$p(x=x')$$的概率，那么就先研究$$f$$找到所有$$z$$使得$$x'=f(z)$$
 >
->   * **<span style="color: rgb(36,91,219); background-color: inherit">Step 2</span>**: 假设$$z$$的解集合为$$\{z_1, z_2, \cdots, z_M\}$$，则<span style="color: rgb(100,37,208); background-color: inherit">把这些</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">出现的概率全部加起来就是</span>$$x'$$<span style="color: rgb(100,37,208); background-color: inherit">出现的概率，即可以得到</span>$$p(x=x')=\sum_{i=1}^Mp(z=z_i)$$
+>   📚 * **<span style="color: rgb(36,91,219); background-color: inherit">Step 2</span>**: 假设$$z$$的解集合为$$\{z_1, z_2, \cdots, z_M\}$$，则<span style="color: rgb(100,37,208); background-color: inherit">把这些</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">出现的概率全部加起来就是</span>$$x'$$<span style="color: rgb(100,37,208); background-color: inherit">出现的概率，即可以得到</span>$$p(x=x')=\sum_{i=1}^Mp(z=z_i)$$
 
 但是<span style="color: rgb(216,57,49); background-color: inherit">要找到 Step 2 里面</span>$$z$$<span style="color: rgb(216,57,49); background-color: inherit">的解集合是很难的，所以虽然</span>$$p(z)$$<span style="color: rgb(216,57,49); background-color: inherit">很简单，</span>$$f$$<span style="color: rgb(216,57,49); background-color: inherit">是个确定过程，但由于</span>$$f$$<span style="color: rgb(216,57,49); background-color: inherit">不一定可逆，</span>$$p(x)$$<span style="color: rgb(216,57,49); background-color: inherit">仍然很难直接算出表达式</span>。目前能做的是<span style="color: rgb(100,37,208); background-color: inherit">数值模拟的方式采样出</span>$$x' \sim p(x)$$<span style="color: rgb(100,37,208); background-color: inherit">，常用的为蒙特卡洛方法</span>：
 
-> 1. 首先依$$p(z)$$的分布采样$$K$$次$$z$$，得到数组$$T_z=[z_1, z_2, \cdots, z_K]$$，其中$$z_i \sim p(z)$$
+> 🚅 1. 首先依$$p(z)$$的分布采样$$K$$次$$z$$，得到数组$$T_z=[z_1, z_2, \cdots, z_K]$$，其中$$z_i \sim p(z)$$
 >
 > 2. 根据$$x=f(z)$$计算得到数组$$T_x=[x_1, x_2, \cdots, x_K]$$
 >
@@ -70,7 +70,7 @@ $$p(x)=\int p(x|z) p(z) \text{d}z$$
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">提高采样效率（VAE 方向）</span>**：这里的$$K$$可能需要非常大才能得到对应满意的结果，也就是生成一个$$x’$$需要很多次$$z$$的采样。因此一种思路是<span style="color: rgb(100,37,208); background-color: inherit">提高</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">的采样效率，最好采样一次就能完成任务</span>
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">改变损失误差（GAN 方向）</span>**：在实际网络训练中，蒙特卡洛采样过程每次得到的$$x'$$会启发式地和真实图片$$x$$做均方误差。但没有证据表明均方误差就是最优度量，因此另外一种思路是<span style="color: rgb(100,37,208); background-color: inherit">用神经网络</span>$$D(x, x')$$<span style="color: rgb(100,37,208); background-color: inherit">来隐式学这个度量方式</span>
+> 🌅 * **<span style="color: rgb(36,91,219); background-color: inherit">改变损失误差（GAN 方向）</span>**：在实际网络训练中，蒙特卡洛采样过程每次得到的$$x'$$会启发式地和真实图片$$x$$做均方误差。但没有证据表明均方误差就是最优度量，因此另外一种思路是<span style="color: rgb(100,37,208); background-color: inherit">用神经网络</span>$$D(x, x')$$<span style="color: rgb(100,37,208); background-color: inherit">来隐式学这个度量方式</span>
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">VAE</span>**
 
@@ -82,7 +82,7 @@ $$p(x)=\int p(x|z) p(z) \text{d}z$$
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Step 1</span>**：先想办法构造一个新的分布$$q_\theta(z|x)$$，使得$$z' \sim q_\theta(z|x)$$
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Step 2</span>**：然后不断优化$$q_\theta(z|x)$$靠近$$p(z|x)$$，使得最终近似满足$$z'\sim p(z|x)$$
+> 🎹 * **<span style="color: rgb(36,91,219); background-color: inherit">Step 2</span>**：然后不断优化$$q_\theta(z|x)$$靠近$$p(z|x)$$，使得最终近似满足$$z'\sim p(z|x)$$
 
 <span style="color: rgb(100,37,208); background-color: inherit">引入的</span>$$q_\theta(z|x)$$<span style="color: rgb(100,37,208); background-color: inherit">是一系列的分布家族，并且需要在里面做优化，选择最合适的</span>$$q_{\theta^*}(z|x)$$<span style="color: rgb(100,37,208); background-color: inherit">分布，这个过程就是</span>**<span style="color: rgb(100,37,208); background-color: inherit">变分</span>**。这里用 KL 衡量一下这两个分布的差距
 
@@ -90,7 +90,7 @@ $$\begin{aligned}\text{KL}(q_\theta(z|x) ||p(z|x))&=\int q_\theta(z|x)\ln \frac{
 
 可以看到，**<span style="color: rgb(100,37,208); background-color: inherit">通过变分绕过了虚无缥缈的</span>$$p(z|x)$$**<span style="color: rgb(100,37,208); background-color: inherit">，留下的 3 项都是可以分析的对象</span>。目标&#x662F;**<span style="color: rgb(100,37,208); background-color: inherit">希望左侧的 KL 距离越来越小，并且要重点关注</span>$$q_\theta(z|x)$$<span style="color: rgb(100,37,208); background-color: inherit">要怎么变才能逼近</span>$$p(z|x)$$**，那就可以逐项分析：
 
-> * 右边第一项$$\text{KL}(q_\theta(z|x)||p(z))$$，希望尽可能小，也就是<span style="color: rgb(100,37,208); background-color: inherit">新引入的采样过程得到的</span>$$z'$$<span style="color: rgb(100,37,208); background-color: inherit">不能离原来的标准多元高斯分布假设</span>$$p(z)$$<span style="color: rgb(100,37,208); background-color: inherit">太远</span>。这里是希望$$z'$$的方差变小，而不是完全变个样。这就是正则项要尽可能小
+> ⛱️ * 右边第一项$$\text{KL}(q_\theta(z|x)||p(z))$$，希望尽可能小，也就是<span style="color: rgb(100,37,208); background-color: inherit">新引入的采样过程得到的</span>$$z'$$<span style="color: rgb(100,37,208); background-color: inherit">不能离原来的标准多元高斯分布假设</span>$$p(z)$$<span style="color: rgb(100,37,208); background-color: inherit">太远</span>。这里是希望$$z'$$的方差变小，而不是完全变个样。这就是正则项要尽可能小
 >
 > * 右边第二项$$-\mathbb{E}_{z\sim q_\theta(z|x)}\ln p(x|z)$$，希望尽可能小，也就是$$\mathbb{E}_{z\sim q_\theta(z|x)}\ln p(x|z)$$<span style="color: rgb(100,37,208); background-color: inherit">要尽可能大，含义就是每张图的似然</span>$$\ln p(x|z)$$<span style="color: rgb(100,37,208); background-color: inherit">在所有</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">采样中要尽可能解释观测数据</span>$$x$$，这就是重建误差要尽可能小
 >
@@ -116,7 +116,7 @@ $$\begin{aligned}\ln p(x) &=\text{KL}(q_\theta(z|x) ||p(z|x)) -\text{KL}(q_\thet
 
 对 VAE 网络有了认识，再回到 VAE 的 loss，包含两项：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">最小化正则项</span>**：从$$\text{KL}(q_\theta(z|x)||p(z))$$转为$$\text{KL}(\mathcal{N}(\mu,\Sigma)||\mathcal{N}(0, I))$$，有闭式解，即最小化$$\sum_{j=1}^d\frac{1}{2}(-\ln \sigma_j^2 + \sigma_j^2 + \mu_j^2 -1)$$
+> 🎉 * **<span style="color: rgb(36,91,219); background-color: inherit">最小化正则项</span>**：从$$\text{KL}(q_\theta(z|x)||p(z))$$转为$$\text{KL}(\mathcal{N}(\mu,\Sigma)||\mathcal{N}(0, I))$$，有闭式解，即最小化$$\sum_{j=1}^d\frac{1}{2}(-\ln \sigma_j^2 + \sigma_j^2 + \mu_j^2 -1)$$
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">最小化重建误差项</span>**：$$\mathbb{E}_{z\sim q_\theta(z|x)}\ln p(x|z)$$可以转换为要求$$x_i$$和$$\hat{x}_i$$的均方误差尽可能小，即最小化$$\sum_{i=1}^N||x_i - \hat{x}^i||^2_2$$
 
@@ -152,7 +152,7 @@ $$-\mathbb{E}_{x\sim P_r}[\log D(x)]-\mathbb{E}_{x\sim P_g}[\log(1- D(x))]$$
 >
 > * 因此$$f$$是一一映射的，同时$$x$$和$$z$$要求是维度一样的，如果$$x \in \mathbb{R}^{D}$$那么$$z \in \mathbb{R}^{D}$$
 >
-> * 既然$$f$$是一一映射的，也用不着积分了，直接变量替换$$z=f^{-1}(x) \sim \mathcal{N}(0, I)$$
+> ✍️ * 既然$$f$$是一一映射的，也用不着积分了，直接变量替换$$z=f^{-1}(x) \sim \mathcal{N}(0, I)$$
 
 变量替换后概率密度为：
 
@@ -162,7 +162,7 @@ $$p(x)=\frac{1}{(2\pi)^{D/2}}\exp(-\frac{1}{2}||f^{-1}(x)||^2)\bigg |\det[\frac{
 
 > * 把$$x$$分成两部分$$x_1$$和$$x_2$$，把$$y$$也分成两部分$$y_1$$和$$y_2$$
 >
-> * 输入和输出 tensor shape 一样的函数$$\mathcal{F}$$和$$\mathcal{G}$$
+> 🏆 * 输入和输出 tensor shape 一样的函数$$\mathcal{F}$$和$$\mathcal{G}$$
 
 那么可以计算前馈和反传，如右图：
 
@@ -174,7 +174,7 @@ $$p(x)=\frac{1}{(2\pi)^{D/2}}\exp(-\frac{1}{2}||f^{-1}(x)||^2)\bigg |\det[\frac{
 
 VAE 的思路是提高$$p(z)$$采样效率：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Encoder</span>**：用参数化的后验分布模型$$q_\theta(z|x)$$，直接预测均值$$\mu$$和方差$$\Sigma$$，使得$$q_\theta(z|x)=\mathcal{N}(\mu, \Sigma)$$
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">Encoder</span>**：用参数化的后验分布模型$$q_\theta(z|x)$$，直接预测均值$$\mu$$和方差$$\Sigma$$，使得$$q_\theta(z|x)=\mathcal{N}(\mu, \Sigma)$$
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Decoder</span>**：采样得到$$z$$之后，经过参数化的$$p_\theta(x|z)$$生成最后的$$\hat{x}$$
 
@@ -190,7 +190,7 @@ $$p_\theta(x|z)=p_\theta(x|x_1)\cdot p_\theta(x_1|x_2)\cdots p_\theta(x_{t-1}|x_
 
 ![](../../images/视觉多模态讲义（下）-G8gCbvKC6oIGdexSc4lcWOavnrb.png)
 
-> * 从右往左的 encoder 是无参数的$$q(x_t|x_{t-1})$$。不像 VAE 是带超参数的，这是<span style="color: rgb(100,37,208); background-color: inherit">人为定义的过程，从原始清晰图</span>$$x_0$$<span style="color: rgb(100,37,208); background-color: inherit">开始，每次转换成新的高斯噪声</span>，逐渐变成标准多元高斯变量$$x_T$$。
+> 🌰 * 从右往左的 encoder 是无参数的$$q(x_t|x_{t-1})$$。不像 VAE 是带超参数的，这是<span style="color: rgb(100,37,208); background-color: inherit">人为定义的过程，从原始清晰图</span>$$x_0$$<span style="color: rgb(100,37,208); background-color: inherit">开始，每次转换成新的高斯噪声</span>，逐渐变成标准多元高斯变量$$x_T$$。
 >
 > * 从左往右的 decoder 是带参数的$$p_\theta(x_{t-1}|x_t)$$。不是像 VAE 一样直接预测$$\hat{x}$$，而是<span style="color: rgb(100,37,208); background-color: inherit">预测高斯噪声，并且会减去这个高斯噪声得到更清晰的图片</span>
 >

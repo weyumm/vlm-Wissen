@@ -18,7 +18,7 @@ $$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x)] + \m
 
 如果生成器和判别器都基于某些额外信息$$y$$进行条件化，生成对抗网络可以扩展为条件模型。$$y$$可以是任何类型的辅助信息，例如<span style="color: rgb(220,155,4); background-color: inherit">类别标签或其他模态的数据</span>。可以<span style="color: rgb(100,37,208); background-color: inherit">通过将</span>$$y$$<span style="color: rgb(100,37,208); background-color: inherit">作为额外输入层提供给判别器和生成器来实现条件化</span>。
 
-> * &#x5728;**<span style="color: rgb(36,91,219); background-color: inherit">生成器</span>**&#x4E2D;，先验噪声输入$$p_z(z)$$和$$y$$被组合成联合隐表示，对抗训练框架允许这种隐表示的构成具有相当大的灵活性
+> ⚽ * &#x5728;**<span style="color: rgb(36,91,219); background-color: inherit">生成器</span>**&#x4E2D;，先验噪声输入$$p_z(z)$$和$$y$$被组合成联合隐表示，对抗训练框架允许这种隐表示的构成具有相当大的灵活性
 >
 > * &#x5728;**<span style="color: rgb(36,91,219); background-color: inherit">判别器</span>**&#x4E2D;，$$x$$和$$y$$被作为输入提供给判别函数，在此情况下，该函数由一个多层感知机实现
 
@@ -52,7 +52,7 @@ $$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x|y)] + 
 >
 > * 对于深层架构，移除全连接隐藏层
 >
-> * 在生成器的所有层中使用 ReLU 激活函数，但输出层使用 Tanh
+> 🏖️ * 在生成器的所有层中使用 ReLU 激活函数，但输出层使用 Tanh
 >
 > * 在判别器的所有层中使用 LeakyReLU 激活函数
 
@@ -82,7 +82,7 @@ InfoGAN 借鉴这个思想，将输入噪声向量分解为两部分，而不是
 
 > * $$z$$：作为不可压缩噪声的来源
 >
-> * $$c$$：潜在编码 latent code，用于捕捉数据分布中的显著结构化语义特征
+> ✍️ * $$c$$：潜在编码 latent code，用于捕捉数据分布中的显著结构化语义特征
 
 数学上，将结构化潜在变量记为$$c_1, c_2, \ldots, c_L$$。最简单的情况下，可以假设一个 factored 分布：
 
@@ -151,13 +151,13 @@ $$\min_{G,Q} \max_D V_{\text{InfoGAN}}(D, G, Q) = V(D, G) - \lambda L_I(G, Q)$$
 
 > * 对于**分类型潜在代码**$$c_i$$，使用 softmax 非线性作为自然选择来表示$$Q(c_i|x)$$
 >
-> * 对于**连续型潜在代码**$$c_j$$，具体的选择取决于真实后验$$P(c_j|x)$$。在 InfoGAN 的实验中，将$$Q(c_j|x)$$设定为独立高斯分布效果就非常好了
+> ✏️ * 对于**连续型潜在代码**$$c_j$$，具体的选择取决于真实后验$$P(c_j|x)$$。在 InfoGAN 的实验中，将$$Q(c_j|x)$$设定为独立高斯分布效果就非常好了
 
 这里 InfoGAN 引入了一个额外的超参数$$\lambda$$，但是非常容易调节：
 
 > 对于离散潜在代码，设置$$\lambda = 1$$即可
 >
-> 对于包含连续变量的潜在代码，通常使用较小的$$\lambda$$，确保$$\lambda L_I(G, Q)$$与 GAN 的目标处于同一数量级
+> 🌅 对于包含连续变量的潜在代码，通常使用较小的$$\lambda$$，确保$$\lambda L_I(G, Q)$$与 GAN 的目标处于同一数量级
 
 由于 GAN 本身训练较为困难，因此 InfoGAN 在实验设计上借鉴了 DC-GAN 中提出的技术，这可以稳定 InfoGAN 的训练过程。
 
@@ -265,7 +265,7 @@ $$\begin{aligned}
 
 设$$X$$是一个紧致度量空间，例如图像空间$$[0, 1]^d$$，$$\Sigma$$表示$$X$$的所有 Borel 子集构成的集合。令$$\mathrm{Prob}(X)$$表示定义在$$X$$上的概率测度空间。然后可以定义两个分布$$P_r, P_g \in \mathrm{Prob}(X)$$之间的基本距离和散度：
 
-> 1. **全变差 <span style="color: rgb(216,57,49); background-color: inherit">TV</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">T</span>**<span style="color: rgb(216,57,49); background-color: inherit">otal </span>**<span style="color: rgb(216,57,49); background-color: inherit">V</span>**<span style="color: rgb(216,57,49); background-color: inherit">ariation）</span>**距离**：
+> 📌 1. **全变差 <span style="color: rgb(216,57,49); background-color: inherit">TV</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">T</span>**<span style="color: rgb(216,57,49); background-color: inherit">otal </span>**<span style="color: rgb(216,57,49); background-color: inherit">V</span>**<span style="color: rgb(216,57,49); background-color: inherit">ariation）</span>**距离**：
 >
 >    $$\delta(P_r, P_g) = \sup_{A \in \Sigma} |P_r(A) - P_g(A)|$$
 >
@@ -397,7 +397,7 @@ $$\mathbb{E}_{z \sim p(z)}[\nabla_\theta f_w(g_\theta(z))]$$
 
 权重裁剪是一个非常差的方式来施加 Lipschitz 约束。
 
-> 如果裁剪参数太大，权重可能需要很长时间才能达到极限，从而使得训练判别器至最优变得困难
+> 🏆 如果裁剪参数太大，权重可能需要很长时间才能达到极限，从而使得训练判别器至最优变得困难
 >
 > 如果裁剪太小，则在层数较多或未使用批归一化时容易导致梯度消失
 
@@ -559,7 +559,7 @@ BigGAN-deep 与 BigGAN 有所不同，使用了一种更简单的 skip-z 条件�
 
 > 在生成器$$  G  $$中，当需要减少通道数时，仅保留前几组通道，其余舍弃
 >
-> 在判别器$$  D  $$中，当需要增加通道数时，将输入通道原样保留，并将其与由$$  1 \times 1  $$卷积生成的剩余通道拼接
+> 🥛 在判别器$$  D  $$中，当需要增加通道数时，将输入通道原样保留，并将其与由$$  1 \times 1  $$卷积生成的剩余通道拼接
 
 在网络配置方面，判别器是生成器的镜像结构。每个分辨率下都有两个残差块，而 BigGAN 中只有一个，因此 BigGAN-deep 的深度是 BigGAN 的四倍。尽管深度更大，但由于其残差块采用了瓶颈结构，BigGAN-deep 的参数数量显著减少。例如，**`128×128`**<span style="color: rgb(220,155,4); background-color: inherit">的 BigGAN-deep 的</span>$$  G  $$<span style="color: rgb(220,155,4); background-color: inherit">和</span>$$  D  $$<span style="color: rgb(220,155,4); background-color: inherit">分别有</span>**`50.4M`**<span style="color: rgb(220,155,4); background-color: inherit">和</span>**`34.6M`**<span style="color: rgb(220,155,4); background-color: inherit">参数，而原始 BigGAN 对应模型分别为</span>**`70.4M`**<span style="color: rgb(220,155,4); background-color: inherit">和</span>**`88.0M`**<span style="color: rgb(220,155,4); background-color: inherit">参数</span>。所有 BigGAN-deep 模型都在$$  64 \times 64  $$分辨率处使用注意力机制，通道宽度乘子$$\text{ch} = 128$$，潜向量$$z \in \mathbb{R}^{128}$$。
 
@@ -605,7 +605,7 @@ $$R_\beta(W) = \beta \|W^\top W \odot (1 - I)\|_F^2$$
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">内容分布</span>**：输入 latent code $$z$$ 先进入 Mapping Network，得到中间 latent code $$w$$。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">分尺度控制</span>**：每一层用独立的 affine transform 把 $$w$$ 变成该层的 style，再调制对应 feature map。
+> ⭐ * **<span style="color: rgb(36,91,219); background-color: inherit">分尺度控制</span>**：每一层用独立的 affine transform 把 $$w$$ 变成该层的 style，再调制对应 feature map。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">随机细节</span>**：每一层接收独立的单通道 Gaussian noise，用于发丝、毛孔和背景纹理等空间随机变化。
 
@@ -655,7 +655,7 @@ AdaIN 会先清除当前 feature map 的均值和方差，再写入新的通道�
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">人脸生成中常见的三段式控制</span>**
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Coarse style</span>**：**`4×4 至 8×8`**，主要控制 pose、整体发型、face shape 和眼镜。
+> ⭐ * **<span style="color: rgb(36,91,219); background-color: inherit">Coarse style</span>**：**`4×4 至 8×8`**，主要控制 pose、整体发型、face shape 和眼镜。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Middle style</span>**：**`16×16 至 32×32`**，主要控制较小尺度的面部特征、发型细节和眼睛开合。
 >
@@ -671,7 +671,7 @@ AdaIN 会先清除当前 feature map 的均值和方差，再写入新的通道�
 >
 > 1. 先固定 Source A 作为各行的基础身份，并把 Source B 放在各列顶部。
 >
-> 2. 只替换 coarse style 时，结果会继承 Source B 的 pose、脸型和眼镜，同时保留 Source A 的配色和细节。
+> 💡 2. 只替换 coarse style 时，结果会继承 Source B 的 pose、脸型和眼镜，同时保留 Source A 的配色和细节。
 >
 > 3. 只替换 middle style 时，较小的面部结构与发型来自 Source B，Source A 的 pose 和整体脸型继续保留。
 >
@@ -709,7 +709,7 @@ StyleGAN 为每个 synthesis layer 准备一张独立的单通道 Gaussian noise
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">Style 与 Noise 的职责不同</span>**
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Style</span>**：对整个 feature map 使用相同缩放和平移，适合控制 pose、identity、lighting 与整体配色等空间一致属性。
+> ⭐ * **<span style="color: rgb(36,91,219); background-color: inherit">Style</span>**：对整个 feature map 使用相同缩放和平移，适合控制 pose、identity、lighting 与整体配色等空间一致属性。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Noise</span>**：每个像素独立采样，适合控制发丝、胡茬、雀斑、毛孔、轮廓边缘和背景纹理等局部随机实现。
 >
@@ -731,7 +731,7 @@ Noise 的作用尺度同样由注入层的 resolution 决定。低 resolution no
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">全部关闭</span>**：图像会出现缺少随机纹理的平滑、绘画感外观。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">仅 Fine Noise</span>**：使用 **`64×64 至 1024×1024`** 层，主要恢复细发卷、细背景纹理和毛孔。
+> ⭐ * **<span style="color: rgb(36,91,219); background-color: inherit">仅 Fine Noise</span>**：使用 **`64×64 至 1024×1024`** 层，主要恢复细发卷、细背景纹理和毛孔。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">仅 Coarse Noise</span>**：使用 **`4×4 至 32×32`** 层，主要形成较大尺度的头发弯曲和背景结构。
 
@@ -855,7 +855,7 @@ FFHQ 在改进配置中使用 non-saturating GAN loss 与 R1 regularization，R1
 >
 > * 普通 bias 与 noise scaling factor 初始化为 **`0`**，style scale 对应的 bias 初始化为 **`1`**。
 >
-> * Generator 与 Discriminator 都不使用 batch normalization、spectral normalization、attention 或 dropout；StyleGAN Generator 也移除了传统的 pixelwise feature normalization。
+> ⭐ * Generator 与 Discriminator 都不使用 batch normalization、spectral normalization、attention 或 dropout；StyleGAN Generator 也移除了传统的 pixelwise feature normalization。
 
 完整的 **`1024×1024`** FFHQ 配置使用 **`8`** 张 Tesla V100，在 DGX-1 上训练约一周。这个计算量对应当时的完整实验配置，不代表减少 GPU 后只会按比例延长时间；minibatch 与训练动态也会变化。
 
@@ -881,7 +881,7 @@ FID 消融表按 A 到 F 的顺序保留了每一步的 CelebA-HQ 与 FFHQ 结�
 
 6. **<span style="color: rgb(36,91,219); background-color: inherit">能力边界与第一代架构缺陷</span>**
 
-> **<span style="color: rgb(36,91,219); background-color: inherit">使用 StyleGAN 时必须保留的边界</span>**
+> ❌ **<span style="color: rgb(36,91,219); background-color: inherit">使用 StyleGAN 时必须保留的边界</span>**
 >
 > * 它是 unconditional Generator，没有文本、类别或结构条件；style direction 也不是人工命名的可控参数。
 >

@@ -42,7 +42,7 @@
 
 > 1. &#x53D6;**<span style="color: rgb(36,91,219); background-color: inherit">最大值</span>**，对应max pooling
 >
-> 2. &#x53D6;**<span style="color: rgb(36,91,219); background-color: inherit">平均值</span>**，对应average pooling
+> ✍️ 2. &#x53D6;**<span style="color: rgb(36,91,219); background-color: inherit">平均值</span>**，对应average pooling
 
 **<span style="color: rgb(222,120,2); background-color: inherit">例</span>**：定义窗口大小&#x4E3A;**`2X2`**, 步长&#x4E3A;**`2`**，两种策略的结果如右图
 
@@ -64,19 +64,19 @@ LeNet 由 **Yann LeCun** 于 1998 年在 **AT\&T** 贝尔实验室提出，最�
 
 1. **<span style="color: rgb(36,91,219); background-color: inherit">局部感受野</span>**：局部感受野的思想来源于生物视觉系统的研究，尤其是猫的视觉神经元实验。在 LeNet-5 中，每个神经元只对输入图像的局部区域敏感，而不是对整个图像进行处理。这种设计显著减少了参数数量，并使网络能够专注于提取局部特征，例如边缘、角点等。
 
-   > 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：通过卷积核（滤波器）对输入图像进行滑动窗口操作，提取局部特征。
+   > 🏖️ 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：通过卷积核（滤波器）对输入图像进行滑动窗口操作，提取局部特征。
    >
    > 2. **<span style="color: rgb(36,91,219); background-color: inherit">优点</span>**：降低了计算复杂度，增强了模型的可解释性。
 
 2. **<span style="color: rgb(36,91,219); background-color: inherit">权值共享</span>**：权值共享是卷积神经网络的核心特性之一，它允许同一个卷积核在整个输入图像上重复使用。这种机制不仅减少了模型的参数数量，还提高了特征提取的一致性。
 
-   > 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：卷积层中的每个卷积核在输入图像的不同位置上共享相同的权重和偏置。
+   > 🥛 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：卷积层中的每个卷积核在输入图像的不同位置上共享相同的权重和偏置。
    >
    > 2. **<span style="color: rgb(36,91,219); background-color: inherit">优点</span>**：大幅减少了模型的存储需求，同时增强了模型对平移不变性的鲁棒性。
 
 3. **<span style="color: rgb(36,91,219); background-color: inherit">池化操作</span>**：池化操作通过对特征图进行下采样，降低其空间维度，从而减少计算量并增强模型的鲁棒性。LeNet-5 中采用的是平均池化 Average Pooling，但现在 CNN 更常用最大池化 Max Pooling 以保留更显著的特征。
 
-   > 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：将特征图划分为若干个 2×2 的区域，取每个区域的平均值或最大值作为输出。
+   > 📌 1. **<span style="color: rgb(36,91,219); background-color: inherit">实现方式</span>**：将特征图划分为若干个 2×2 的区域，取每个区域的平均值或最大值作为输出。
    >
    > 2. **<span style="color: rgb(36,91,219); background-color: inherit">优点</span>**：减少了特征图的空间尺寸，缓解了过拟合问题。
 
@@ -86,11 +86,11 @@ LeNet 由 **Yann LeCun** 于 1998 年在 **AT\&T** 贝尔实验室提出，最�
 
 **LeNet-5** 的设计体现了卷积、池化和全连接层的有机结合。以下是对 **LeNet-5** 的网络结构详解：
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">输入层</span>**：**LeNet-5** 的输入层接受大小&#x4E3A;**`32×32`**&#x7684;灰度图像。尽管 MNIST 数据集中的手写数字图像原始尺寸&#x4E3A;**`28×28`**，但在输入到网络之前，这些图像会被填充&#x5230;**`32×32`**，以便更好地适应卷积操作的需求。
+> 🌟 1. **<span style="color: rgb(36,91,219); background-color: inherit">输入层</span>**：**LeNet-5** 的输入层接受大小&#x4E3A;**`32×32`**&#x7684;灰度图像。尽管 MNIST 数据集中的手写数字图像原始尺寸&#x4E3A;**`28×28`**，但在输入到网络之前，这些图像会被填充&#x5230;**`32×32`**，以便更好地适应卷积操作的需求。
 
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">第一卷积块</span>**：**LeNet-5** 的第一个卷积块由一个卷积层和一个池化层组成。
 >
->    1. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层</span>**：第一卷积层使&#x7528;**`6`**&#x4E2A;**`5×5`**&#x7684;卷积核对输入图像进行卷积操作，生&#x6210;**`6`**&#x4E2A;特征图。每个卷积核通过滑动窗口的方式提取局部特征，例如边缘、角点等。由于输入图像是单通道的灰度图像，因此卷积核的深度&#x4E3A;**`1`**。
+>    🌰 1. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层</span>**：第一卷积层使&#x7528;**`6`**&#x4E2A;**`5×5`**&#x7684;卷积核对输入图像进行卷积操作，生&#x6210;**`6`**&#x4E2A;特征图。每个卷积核通过滑动窗口的方式提取局部特征，例如边缘、角点等。由于输入图像是单通道的灰度图像，因此卷积核的深度&#x4E3A;**`1`**。
 >
 >       1. 输出特征图的尺寸&#x4E3A;**`28×28`**，这是通过公式$$(W−F+2P)/S+1$$计算得出的，其中$$W=32$$是输入尺寸，$$F=5$$是卷积核尺寸，$$P=0$$是填充，$$S=1$$是步幅。
 >
@@ -102,7 +102,7 @@ LeNet 由 **Yann LeCun** 于 1998 年在 **AT\&T** 贝尔实验室提出，最�
 
 > 3. **<span style="color: rgb(36,91,219); background-color: inherit">第二卷积块</span>**：第二个卷积块进一步提取更高级的特征。
 >
->    1. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层</span>**：第二卷积层使&#x7528;**`16`**&#x4E2A;**`5×5`**&#x7684;卷积核对前一层&#x7684;**`6`**&#x4E2A;特征图进行卷积操作，生&#x6210;**`16`**&#x4E2A;新的特征图。为了减少参数数量，这里采用了部分连接的方式：并非所有输入特征图都与所有输出特征图相连。
+>    🍞 1. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层</span>**：第二卷积层使&#x7528;**`16`**&#x4E2A;**`5×5`**&#x7684;卷积核对前一层&#x7684;**`6`**&#x4E2A;特征图进行卷积操作，生&#x6210;**`16`**&#x4E2A;新的特征图。为了减少参数数量，这里采用了部分连接的方式：并非所有输入特征图都与所有输出特征图相连。
 >
 >       1. 输出特征图的尺寸&#x4E3A;**`10×10`**，计算方式同上。
 >
@@ -114,11 +114,11 @@ LeNet 由 **Yann LeCun** 于 1998 年在 **AT\&T** 贝尔实验室提出，最�
 >
 >    1. **<span style="color: rgb(36,91,219); background-color: inherit">展平操作</span>**：在进入全连接层之前，特征图被展平为一维向量。展平后的向量长度为$$16×5×5=400$$。
 >
->    2. **<span style="color: rgb(36,91,219); background-color: inherit">第一全连接层</span>**：第一全连接层&#x6709;**`120`**&#x4E2A;神经元，用于整合卷积层提取的特征。参数数量为 $$400×120+120=48,120$$。
+>    🎹 2. **<span style="color: rgb(36,91,219); background-color: inherit">第一全连接层</span>**：第一全连接层&#x6709;**`120`**&#x4E2A;神经元，用于整合卷积层提取的特征。参数数量为 $$400×120+120=48,120$$。
 >
 >    3. **<span style="color: rgb(36,91,219); background-color: inherit">第二全连接层</span>**：第二全连接层&#x6709;**`84`**&#x4E2A;神经元，进一步压缩特征表示。参数数量为$$120×84+84=10,164$$。
 
-> 5. **<span style="color: rgb(36,91,219); background-color: inherit">输出层</span>**：输出层&#x6709;**`10`**&#x4E2A;神经元，对应于 **MNIST** 数据集中的 0 到 9 &#x5171;**`10`**&#x4E2A;类别。使用 **Softmax** 激活函数输出每个类别的概率分布。参数数量为$$84×10+10=850$$。
+> 🎉 5. **<span style="color: rgb(36,91,219); background-color: inherit">输出层</span>**：输出层&#x6709;**`10`**&#x4E2A;神经元，对应于 **MNIST** 数据集中的 0 到 9 &#x5171;**`10`**&#x4E2A;类别。使用 **Softmax** 激活函数输出每个类别的概率分布。参数数量为$$84×10+10=850$$。
 
 **<span style="color: rgb(36,91,219); background-color: inherit">激活函数</span>**：**LeNet-5** 使用非线性激活函数增强模型的表达能力。早期版本中通常采用 **Sigmoid** 或 **Tanh** 函数，但现在实现中更倾向于使用 **ReLU** 以加速训练并缓解梯度消失问题。
 
@@ -148,7 +148,7 @@ LeNet 作为卷积神经网络的奠基之作，不仅在技术上开创了先�
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">卷积层</span>**：&#x5171;**`5`**&#x4E2A;卷积层，其中前两个卷积层后接局部响应归一&#x5316;**`LRN`**&#x548C;最大池&#x5316;**`Max-Pooling`**，后续卷积层则直接堆叠。这些卷积层通过不同的滤波器逐步提取图像特征。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">全连接层</span>**：包&#x542B;**`3`**&#x4E2A;全连接层，其中前两个全连接层使&#x7528;**`ReLU`**&#x6FC0;活函数，并结&#x5408;**`Dropout`**&#x8FDB;行正则化。最后一个全连接层输&#x51FA;**`1000`**&#x4E2A;类别的概率分布，对应于ImageNet数据集的分类任务。
+> 🚅 * **<span style="color: rgb(36,91,219); background-color: inherit">全连接层</span>**：包&#x542B;**`3`**&#x4E2A;全连接层，其中前两个全连接层使&#x7528;**`ReLU`**&#x6FC0;活函数，并结&#x5408;**`Dropout`**&#x8FDB;行正则化。最后一个全连接层输&#x51FA;**`1000`**&#x4E2A;类别的概率分布，对应于ImageNet数据集的分类任务。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">输出层</span>**：通&#x8FC7;**`Softmax`**&#x51FD;数计算每个类别的概率值。
 
@@ -156,7 +156,7 @@ LeNet 作为卷积神经网络的奠基之作，不仅在技术上开创了先�
 
 **AlexNet** 的卷积层设计体现了当时的技术创新，以下是各层的具体参数和功能：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">C1 层</span>**：第一个卷积层使&#x7528;**`96`**&#x4E2A;大小&#x4E3A;**`11×11`**、步长&#x4E3A;**`4`**&#x7684;卷积核，生&#x6210;**`96`**&#x4E2A;特征图。由于卷积核较大，**<span style="color: rgb(100,37,208); background-color: inherit">C1</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 层主要捕捉图像中的低级特征，例如边缘和纹理</span>。
+> 🌟 * **<span style="color: rgb(36,91,219); background-color: inherit">C1 层</span>**：第一个卷积层使&#x7528;**`96`**&#x4E2A;大小&#x4E3A;**`11×11`**、步长&#x4E3A;**`4`**&#x7684;卷积核，生&#x6210;**`96`**&#x4E2A;特征图。由于卷积核较大，**<span style="color: rgb(100,37,208); background-color: inherit">C1</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 层主要捕捉图像中的低级特征，例如边缘和纹理</span>。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">C2 层</span>**：第二个卷积层使&#x7528;**`256个5×5`**&#x7684;卷积核，步长&#x4E3A;**`1`**，并<span style="color: rgb(100,37,208); background-color: inherit">采用零填充 </span>**<span style="color: rgb(100,37,208); background-color: inherit">Zero Padding</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 以保持特征图的尺寸不变。</span>**<span style="color: rgb(100,37,208); background-color: inherit">C2</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 层进一步组合低级特征，形成更复杂的模式</span>。
 >
@@ -270,7 +270,7 @@ $$\text{参数量} = \text{输入神经元数} \times \text{输出神经元数} 
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">梯度消失问题</span>**：随着网络深度的增加，<span style="color: rgb(216,57,49); background-color: inherit">传统的激活函数，如 ReLU，可能会导致梯度消失问题，从而阻碍模型的进一步优化</span>。这一问题在后来的 ResNet 中通过引入残差连接得到了有效解决。
 >
-> 3) **<span style="color: rgb(36,91,219); background-color: inherit">全连接层的冗余性</span>**：<span style="color: rgb(216,57,49); background-color: inherit">全连接层占据了大部分的参数量，但其作用却相对有限</span>。后续的研究表明，通过全局平均池化 Global Average Pooling 可以替代全连接层，从而显著降低模型的复杂度。
+> 🍰 3) **<span style="color: rgb(36,91,219); background-color: inherit">全连接层的冗余性</span>**：<span style="color: rgb(216,57,49); background-color: inherit">全连接层占据了大部分的参数量，但其作用却相对有限</span>。后续的研究表明，通过全局平均池化 Global Average Pooling 可以替代全连接层，从而显著降低模型的复杂度。
 >
 > 4) **<span style="color: rgb(36,91,219); background-color: inherit">内存瓶颈</span>**：在训练过程中，**VGG** 的深层结构可能导致显存不足的问题。尤其是在早期的硬件环境下，这种限制更加明显\[\[7]]。
 
@@ -308,7 +308,7 @@ GoogLeNet的名字也颇具深意。它不仅是对 LeNet 的致敬，还象征�
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">3×3 卷积</span>**：<span style="color: rgb(100,37,208); background-color: inherit">捕捉局部特征</span>。**`3×3`**&#x5377;积核是卷积神经网络中最常用的卷积核尺寸之一，能够有效提取局部空间信息。相比于更大的卷积核，**3×3** 卷积核的感受野较小，但计算成本较低，适合提取细粒度特征。
 >
-> 3) **<span style="color: rgb(36,91,219); background-color: inherit">5×5 卷积</span>**：<span style="color: rgb(100,37,208); background-color: inherit">捕获更大范围的空间信息</span>。相比于 **3×3&#x20;**&#x5377;积，**`5×5`**&#x5377;积核的感受野更大，适合提取全局特征。然而，**5×5** 卷积的计算成本较高，因此 GoogLeNet 采用了瓶颈层 Bottleneck Layer 的设计，先通过 **1×1** 卷积降低输入通道数，再进行 **5×5** 卷积操作。
+> 🌟 3) **<span style="color: rgb(36,91,219); background-color: inherit">5×5 卷积</span>**：<span style="color: rgb(100,37,208); background-color: inherit">捕获更大范围的空间信息</span>。相比于 **3×3&#x20;**&#x5377;积，**`5×5`**&#x5377;积核的感受野更大，适合提取全局特征。然而，**5×5** 卷积的计算成本较高，因此 GoogLeNet 采用了瓶颈层 Bottleneck Layer 的设计，先通过 **1×1** 卷积降低输入通道数，再进行 **5×5** 卷积操作。
 >
 > 4) **<span style="color: rgb(36,91,219); background-color: inherit">3×3 最大池化</span>**：<span style="color: rgb(100,37,208); background-color: inherit">提取全局特征</span>。最大池化操作通过对特征图进行下采样，保留最显著的特征，同时降低特征图的分辨率。这种操作不仅减少了计算量，还能增强模型对输入变化的鲁棒性。
 
@@ -328,7 +328,7 @@ GoogLeNet的名字也颇具深意。它不仅是对 LeNet 的致敬，还象征�
 
 > 1. 在网络的中间层，通常是倒数第二个和第三个 Inception 模块之后，分别添加一个辅助分类器
 >
-> 2. 每个辅助分类器包含一&#x4E2A;**`5×5`**&#x7684;平均池化层、一&#x4E2A;**`1×1`**&#x5377;积层用于降维、两个全连接层以及一&#x4E2A;**`Softmax`**&#x5206;类器
+> 🍰 2. 每个辅助分类器包含一&#x4E2A;**`5×5`**&#x7684;平均池化层、一&#x4E2A;**`1×1`**&#x5377;积层用于降维、两个全连接层以及一&#x4E2A;**`Softmax`**&#x5206;类器
 >
 > 3) 在训练阶段，<span style="color: rgb(100,37,208); background-color: inherit">辅助分类器的损失函数与主分类器的损失函数按一定权重相加，共同指导网络的优化过程</span>
 
@@ -344,7 +344,7 @@ GoogLeNet的名字也颇具深意。它不仅是对 LeNet 的致敬，还象征�
 
 > 1. **<span style="color: rgb(36,91,219); background-color: inherit">输入层</span>**：接&#x53D7;**`224×224`**&#x5927;小的RGB图像作为输入
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层 1</span>**：包含一&#x4E2A;**`7×7`**&#x7684;卷积层，步长&#x4E3A;**`2`**，输出通道数&#x4E3A;**`64`**，后接一&#x4E2A;**`3×3`**&#x7684;最大池化层，步长&#x4E3A;**`2`**
+> 📚 2. **<span style="color: rgb(36,91,219); background-color: inherit">卷积层 1</span>**：包含一&#x4E2A;**`7×7`**&#x7684;卷积层，步长&#x4E3A;**`2`**，输出通道数&#x4E3A;**`64`**，后接一&#x4E2A;**`3×3`**&#x7684;最大池化层，步长&#x4E3A;**`2`**
 >
 > 3) **<span style="color: rgb(36,91,219); background-color: inherit">卷积层 2</span>**：包含一&#x4E2A;**`1×1`**&#x5377;积层和一&#x4E2A;**`3×3`**&#x7684;卷积层，输出通道数&#x4E3A;**`192`**，用于进一步提取低级特征
 >
@@ -392,7 +392,7 @@ $$y = F(x, \{W_i\}) + x$$
 
 **ResNet** 的基本单元是残差块，其结构如右图所示。<span style="color: rgb(100,37,208); background-color: inherit">每个残差块通常由两到三个卷积层组成，并通过跳跃连接将输入直接传递到输出</span>。如果输入和输出的维度不一致，则可以通过线性投影（通常&#x662F;**`1x1`**&#x5377;积）来调整维度。
 
-**ResNet&#x20;**&#x7684;设计非常灵活，可以根据任务需求堆叠不同数量的残差块。例如，经典&#x7684;**`ResNet-18`**、**`ResNet-34`**、**`ResNet-50`**、**`ResNet-101`**&#x548C;**`ResNet-152`**&#x5206;别包&#x542B;**`18`**&#x5C42;、**`34`**&#x5C42;、**`50`**&#x5C42;、**`101`**&#x5C42;&#x548C;**`152`**&#x5C42;网络。尽管这些网络的深度差异显著，但它们都基于相同的残差学习框架。
+> 🌟 **ResNet&#x20;**&#x7684;设计非常灵活，可以根据任务需求堆叠不同数量的残差块。例如，经典&#x7684;**`ResNet-18`**、**`ResNet-34`**、**`ResNet-50`**、**`ResNet-101`**&#x548C;**`ResNet-152`**&#x5206;别包&#x542B;**`18`**&#x5C42;、**`34`**&#x5C42;、**`50`**&#x5C42;、**`101`**&#x5C42;&#x548C;**`152`**&#x5C42;网络。尽管这些网络的深度差异显著，但它们都基于相同的残差学习框架。
 
 ![](../../images/视觉多模态讲义（上）-image-23.png)
 
@@ -400,11 +400,11 @@ $$y = F(x, \{W_i\}) + x$$
 
 2. **<span style="color: rgb(36,91,219); background-color: inherit">卷积</span>**：中间卷积部分是 ResNet 的核心，由多个阶段组成，每个阶段包含若干个残差块。根据网络深度的不同，这些阶段的数量和每个阶段中的残差块数量也会有所不同。例如，**<span style="color: rgb(220,155,4); background-color: inherit">ResNet-18</span>**<span style="color: rgb(220,155,4); background-color: inherit"> 和 </span>**<span style="color: rgb(220,155,4); background-color: inherit">ResNet-34</span>**<span style="color: rgb(220,155,4); background-color: inherit"> 使用的是</span>**<span style="color: rgb(220,155,4); background-color: inherit">基本残差块</span>**<span style="color: rgb(220,155,4); background-color: inherit">，而 ResNet-50 及更深的网络则使用</span>**<span style="color: rgb(220,155,4); background-color: inherit">瓶颈残差块</span>**。
 
-   > **<span style="color: rgb(36,91,219); background-color: inherit">基本残差块</span>**：基本残差块由两&#x4E2A;**`3x3`**&#x7684;卷积层组成，每个卷积层后接批量归一化 **BN** 和 **ReLU** 激活函数。跳跃连接直接将输入添加到输出上。如果输入和输出的通道数不一致，则通&#x8FC7;**`1x1`**&#x5377;积调整维度。
+   > ⛱️ **<span style="color: rgb(36,91,219); background-color: inherit">基本残差块</span>**：基本残差块由两&#x4E2A;**`3x3`**&#x7684;卷积层组成，每个卷积层后接批量归一化 **BN** 和 **ReLU** 激活函数。跳跃连接直接将输入添加到输出上。如果输入和输出的通道数不一致，则通&#x8FC7;**`1x1`**&#x5377;积调整维度。
 
    ![](../../images/视觉多模态讲义（上）-image-28.png)
 
-   > **<span style="color: rgb(36,91,219); background-color: inherit">瓶颈残差块</span>**：瓶颈残差块是 ResNet-50 及更深网络的核心组件。它由三个卷积层组成：第一&#x4E2A;**`1x1`**&#x5377;积层用于降维，减少计算量；第二&#x4E2A;**`3x3`**&#x5377;积层用于提取特征；第三&#x4E2A;**`1x1`**&#x5377;积层用于升维，恢复通道数。跳跃连接同样直接将输入添加到输出上，必要时通&#x8FC7;**`1x1`**&#x5377;积调整维度
+   > 🍞 **<span style="color: rgb(36,91,219); background-color: inherit">瓶颈残差块</span>**：瓶颈残差块是 ResNet-50 及更深网络的核心组件。它由三个卷积层组成：第一&#x4E2A;**`1x1`**&#x5377;积层用于降维，减少计算量；第二&#x4E2A;**`3x3`**&#x5377;积层用于提取特征；第三&#x4E2A;**`1x1`**&#x5377;积层用于升维，恢复通道数。跳跃连接同样直接将输入添加到输出上，必要时通&#x8FC7;**`1x1`**&#x5377;积调整维度
 
    ![](../../images/视觉多模态讲义（上）-image-22.png)
 
@@ -418,7 +418,7 @@ $$y = F(x, \{W_i\}) + x$$
 
    > **<span style="color: rgb(36,91,219); background-color: inherit">零填充</span>**：在通道维度上用零填充输入，使其与输出的维度一致。
    >
-   > **<span style="color: rgb(36,91,219); background-color: inherit">1x1卷积</span>**：通&#x8FC7;**`1x1`**&#x5377;积调整输入的通道数和空间分辨率，使其与输出匹配
+   > 🎨 **<span style="color: rgb(36,91,219); background-color: inherit">1x1卷积</span>**：通&#x8FC7;**`1x1`**&#x5377;积调整输入的通道数和空间分辨率，使其与输出匹配
 
    第二种方法更为常用，因为它能够在调整维度的同时引入额外的非线性变换，从而增强模型的表达能力。
 
@@ -498,7 +498,7 @@ $$x_l = H_l([x_0, x_1, ..., x_{l-1}])$$
 
 **DenseNet&#x20;**&#x7684;设计带来了多方面的技术优势：
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">参数效率高</span>**：在 ImageNet 分类任务上，**<span style="color: rgb(46,161,33); background-color: inherit">DenseNet </span>**<span style="color: rgb(46,161,33); background-color: inherit">在达到与 ResNet 相当准确率的同时，所需的参数量不到 ResNet 的一半</span>。这得益于密集连接机制对特征的充分利用，避免了冗余计算。
+> ⛱️ 1. **<span style="color: rgb(36,91,219); background-color: inherit">参数效率高</span>**：在 ImageNet 分类任务上，**<span style="color: rgb(46,161,33); background-color: inherit">DenseNet </span>**<span style="color: rgb(46,161,33); background-color: inherit">在达到与 ResNet 相当准确率的同时，所需的参数量不到 ResNet 的一半</span>。这得益于密集连接机制对特征的充分利用，避免了冗余计算。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">隐式正则化效果</span>**：通过拼接不同层的特征图，**<span style="color: rgb(100,37,208); background-color: inherit">DenseNet </span>**<span style="color: rgb(100,37,208); background-color: inherit">在训练过程中自然地引入了一种隐式的正则化效果</span>。这种正则化有助于提高模型的稳定性，尤其是在小样本数据集上表现尤为突出。
 >
@@ -572,7 +572,7 @@ $$\hat{x}_c = s_c \cdot x_c$$
 >
 >    * 一&#x4E2A;**`3×3`**&#x6700;大池化分支，后&#x63A5;**`1×1`**&#x5377;积升维
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">嵌入 SE 块</span>**：在 **Inception&#x20;**&#x6A21;块的输出特征图上添加 **SE&#x20;**&#x5757;，通过对每个通道进行全局平均池化（**`Squeeze`**）、两层全连接网络生成通道权重（**`Excitation`**），最后通过缩放操作（**`Scale`**）重新校准特征图
+> ❤️ 2. **<span style="color: rgb(36,91,219); background-color: inherit">嵌入 SE 块</span>**：在 **Inception&#x20;**&#x6A21;块的输出特征图上添加 **SE&#x20;**&#x5757;，通过对每个通道进行全局平均池化（**`Squeeze`**）、两层全连接网络生成通道权重（**`Excitation`**），最后通过缩放操作（**`Scale`**）重新校准特征图
 
 ![](../../images/视觉多模态讲义（上）-image-25.png)
 
@@ -592,7 +592,7 @@ $$\hat{x}_c = s_c \cdot x_c$$
 >
 >    最终输出通过跳跃连接与输入相加，形成残差结构。
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">嵌入 SE 块</span>**：在 ResNet 模块的输出特征图上添加 **SE&#x20;**&#x5757;，<span style="color: rgb(100,37,208); background-color: inherit">通过 </span>**<span style="color: rgb(100,37,208); background-color: inherit">Squeeze-Excitation-Scale</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 三步操作对通道特征进行重新校准</span>。具体而言，**SE** 块被放置在残差连接之后，即：
+> 📌 2. **<span style="color: rgb(36,91,219); background-color: inherit">嵌入 SE 块</span>**：在 ResNet 模块的输出特征图上添加 **SE&#x20;**&#x5757;，<span style="color: rgb(100,37,208); background-color: inherit">通过 </span>**<span style="color: rgb(100,37,208); background-color: inherit">Squeeze-Excitation-Scale</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 三步操作对通道特征进行重新校准</span>。具体而言，**SE** 块被放置在残差连接之后，即：
 >
 >    $$y=F(x,{W_i})+x$$
 >
@@ -646,7 +646,7 @@ $$\hat{x}_c = s_c \cdot x_c$$
 
 > 1. **<span style="color: rgb(36,91,219); background-color: inherit">全局平均池化的巧妙应用</span>**：全局平均池化操作不仅有效地压缩了空间信息，还避免了引入过多的参数。这使得<span style="color: rgb(100,37,208); background-color: inherit"> </span>**<span style="color: rgb(100,37,208); background-color: inherit">SE </span>**<span style="color: rgb(100,37,208); background-color: inherit">块能够在保持轻量化的同时，捕捉到全局上下文信息</span>
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">瓶颈结构的设计</span>**：在 **Excitation&#x20;**&#x9636;段，**SE&#x20;**&#x5757;采用了瓶颈结构 Bottleneck Structure，即先通过降维减少通道数，再通过升维恢复原始通道数。假设原始通道数为$$C$$，降维比例为$$r$$，则中间层的通道数为$$C/r$$。这种设计<span style="color: rgb(46,161,33); background-color: inherit">大幅降低了计算复杂度，同时保留了足够的表达能力</span>
+> ❤️ 2. **<span style="color: rgb(36,91,219); background-color: inherit">瓶颈结构的设计</span>**：在 **Excitation&#x20;**&#x9636;段，**SE&#x20;**&#x5757;采用了瓶颈结构 Bottleneck Structure，即先通过降维减少通道数，再通过升维恢复原始通道数。假设原始通道数为$$C$$，降维比例为$$r$$，则中间层的通道数为$$C/r$$。这种设计<span style="color: rgb(46,161,33); background-color: inherit">大幅降低了计算复杂度，同时保留了足够的表达能力</span>
 >
 > 3) **<span style="color: rgb(36,91,219); background-color: inherit">可嵌入性与普适性</span>**：**SE** 块是一种高度模块化的组件，可以无缝嵌入到现有的卷积神经网络架构中。无论&#x662F;**`ResNet`**、**`Inception`**&#x8FD8;&#x662F;**`DenseNet`**，只需在每个卷积块后添加一个 **SE&#x20;**&#x5757;，即可显著提升模型性能。这种普适性使得 **SENet&#x20;**&#x6210;为一种极具吸引力的通用工具
 >
@@ -664,7 +664,7 @@ $$\hat{x}_c = s_c \cdot x_c$$
 
 **SENet&#x20;**&#x7684;主要创新点可以总结为以下几点： &#x20;
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">通道注意力机制的引入</span>**：**SENet&#x20;**&#x9996;次系统性地提出了通道注意力机制，通过显式建模通道间的依赖关系，增强了网络对重要特征的聚焦能力
+> 🚅 1. **<span style="color: rgb(36,91,219); background-color: inherit">通道注意力机制的引入</span>**：**SENet&#x20;**&#x9996;次系统性地提出了通道注意力机制，通过显式建模通道间的依赖关系，增强了网络对重要特征的聚焦能力
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">自适应特征重新校准</span>**：通过动态调整每个通道的重要性，**SENet&#x20;**&#x5B9E;现了对特征图的自适应重新校准，从而提升了模型的表示能力
 >

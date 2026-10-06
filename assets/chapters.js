@@ -33,7 +33,7 @@ window.VLM_CHAPTERS = {
     { file: '15-UMM-统一理解生成模型--Any-to-AnyOmni-全模态', title: 'UMM 统一理解生成模型 · Any-to-Any（Omni 全模态）', code: false },
   ],
   'interview': [
-    { file: '01-模型原理', title: '模型原理', code: false },
+    { file: '01-模型原理', title: '模型原理', code: true },
     { file: '02-对比分析', title: '对比分析', code: false },
     { file: '03-模型细节架构与应用', title: '模型细节、架构与应用', code: false },
     { file: '04-训练与微调', title: '训练与微调', code: false },

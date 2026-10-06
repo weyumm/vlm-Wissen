@@ -53,7 +53,7 @@ $$\begin{aligned}
 
 > 1. 必须易于求逆
 >
-> 2. 雅可比行列式必须易于计算
+> 👍 2. 雅可比行列式必须易于计算
 
 在引入归一化流后，输入数据的精确对数似然$$\log p(\mathbf{x})$$变得可计算。因此，<span style="color: rgb(100,37,208); background-color: inherit">基于流的生成模型的训练准则就是训练数据集 </span>$$\mathcal{D}$$<span style="color: rgb(100,37,208); background-color: inherit"> 上的负对数似然</span>**`NLL`**：
 
@@ -65,7 +65,7 @@ $$\mathcal{L}(\mathcal{D}) = -\frac{1}{|\mathcal{D}|} \sum_{\mathbf{x} \in \math
 
 > * 前$$d$$个维度保持不变
 >
-> * 从$$d+1$$到$$D$$的维度，<span style="color: rgb(100,37,208); background-color: inherit">进行仿射变换，即</span>**<span style="color: rgb(100,37,208); background-color: inherit">缩放和平移</span>**<span style="color: rgb(100,37,208); background-color: inherit">，并且缩放和平移参数都是前</span>$$d$$<span style="color: rgb(100,37,208); background-color: inherit">个维度的函数</span>
+> 👍 * 从$$d+1$$到$$D$$的维度，<span style="color: rgb(100,37,208); background-color: inherit">进行仿射变换，即</span>**<span style="color: rgb(100,37,208); background-color: inherit">缩放和平移</span>**<span style="color: rgb(100,37,208); background-color: inherit">，并且缩放和平移参数都是前</span>$$d$$<span style="color: rgb(100,37,208); background-color: inherit">个维度的函数</span>
 
 也就是说：
 
@@ -209,7 +209,7 @@ $$M^{\mathbf{V}}_{d,k} =
 
 MADE 训练可以通过以下方式进一步促进：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">顺序无关训练 Order-agnostic training</span>**：打乱输入维度，使 MADE 能够建模任意顺序；这可以在运行时创建一个自回归模型的集合。
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">顺序无关训练 Order-agnostic training</span>**：打乱输入维度，使 MADE 能够建模任意顺序；这可以在运行时创建一个自回归模型的集合。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">连接无关训练 Connectivity-agnostic training</span>**：为了避免模型被特定的连接模式约束，为每个训练小批量重新采样$$m_k^l$$。
 
@@ -265,7 +265,7 @@ $$\mathbf{z} = \tanh(\mathbf{W}_{f,k} \otimes \mathbf{x}) \odot \sigma(\mathbf{W
 
 具体来说，条件概率是$$\mathbf{z}$$的仿射变换，其中缩放和偏移项是已观测部分$$\mathbf{x}$$的函数：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">数据生成</span>**：生成一个新的$$\mathbf{x}$$：
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">数据生成</span>**：生成一个新的$$\mathbf{x}$$：
 >
 > $$x_i \sim p(x_i | \mathbf{x}_{1:i-1}) = z_i \odot \sigma_i(\mathbf{x}_{1:i-1}) + \mu_i(\mathbf{x}_{1:i-1}), \quad \text{其中 } \mathbf{z} \sim \pi(\mathbf{z})$$
 >
@@ -329,7 +329,7 @@ MAF 与 IAF 对比如下：
 </tbody>
 </table>
 
-> * MAF 中各个元素$$\tilde{x}_i$$的计算彼此独立，因此可以轻松并行化，仅需一次前向传播，如使用 MADE 架构
+> 👍 * MAF 中各个元素$$\tilde{x}_i$$的计算彼此独立，因此可以轻松并行化，仅需一次前向传播，如使用 MADE 架构
 >
 > * 但对于已知$$\tilde{\mathbf{x}}$$的密度估计，效率较低，因为需要按顺序恢复$$\tilde{z}_i$$的值：
 >

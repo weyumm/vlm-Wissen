@@ -272,6 +272,88 @@
 
   /* ---------- images ---------- */
 
+  /* Feishu callouts survived in the Markdown as blockquotes whose text now
+     begins with the original emoji. Give them a card treatment. */
+  var EMOJI_RE = /^\s*(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/u;
+
+  function enhanceCallouts() {
+    var quotes = article.querySelectorAll('blockquote');
+    for (var i = 0; i < quotes.length; i++) {
+      var q = quotes[i];
+      if (q.classList.contains('vlm-callout')) continue;
+      /* The emoji may sit a few text nodes in (blockquote > p > text), and the
+         first text node can be just a newline, so scan rather than only
+         looking at the very first node. */
+      var walker = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, null);
+      var node, m = null;
+      while ((node = walker.nextNode())) {
+        m = EMOJI_RE.exec(node.nodeValue);
+        if (m) break;
+        if (node.nodeValue.trim()) break;  // real content, no emoji -> give up
+      }
+      if (!m) continue;
+      q.classList.add('vlm-callout');
+      var range = document.createRange();
+      range.setStart(node, m.index);
+      range.setEnd(node, m.index + m[1].length);
+      var badge = document.createElement('span');
+      badge.className = 'callout-emoji';
+      try { range.surroundContents(badge); } catch (e) { /* already styled */ }
+    }
+  }
+
+  /* Wrap every <pre> in a frame with a language label and a copy button. */
+  function enhanceCodeBlocks() {
+    var pres = article.querySelectorAll('pre');
+    for (var i = 0; i < pres.length; i++) {
+      var pre = pres[i];
+      if (!pre.parentNode) continue;
+      if (pre.parentNode.classList && pre.parentNode.classList.contains('code-block')) continue;
+      var code = pre.querySelector('code');
+      var lang = '';
+      if (code && code.className) {
+        var lm = /language-([\w+#-]+)/.exec(code.className);
+        if (lm) lang = lm[1];
+      }
+      var wrap = document.createElement('div');
+      wrap.className = 'code-block';
+      var head = document.createElement('div');
+      head.className = 'code-head';
+      var tag = document.createElement('span');
+      tag.className = 'code-lang';
+      tag.textContent = lang || 'code';
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.type = 'button';
+      btn.textContent = '复制';
+      btn.addEventListener('click', function () {
+        var b = this;
+        var c = b.parentNode.parentNode.querySelector('code');
+        var text = c ? c.textContent : '';
+        var done = function () {
+          b.textContent = '已复制';
+          b.classList.add('copied');
+          setTimeout(function () { b.textContent = '复制'; b.classList.remove('copied'); }, 1600);
+        };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () {});
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text;
+          document.body.appendChild(ta);
+          ta.select();
+          try { document.execCommand('copy'); done(); } catch (e) {}
+          ta.remove();
+        }
+      });
+      head.appendChild(tag);
+      head.appendChild(btn);
+      pre.parentNode.insertBefore(wrap, pre);
+      wrap.appendChild(head);
+      wrap.appendChild(pre);
+    }
+  }
+
   function tuneImages() {
     var imgs = article.querySelectorAll('img');
     for (var i = 0; i < imgs.length; i++) {
@@ -516,6 +598,8 @@
       observe();
       if (window.VLMTheme) window.VLMTheme.index(article);
       tuneImages();
+      enhanceCallouts();
+      enhanceCodeBlocks();
       Array.prototype.forEach.call(article.querySelectorAll('a[href^="http"]'), function (a) {
         a.setAttribute('target', '_blank');
         a.setAttribute('rel', 'noopener noreferrer');

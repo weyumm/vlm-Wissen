@@ -37,7 +37,7 @@ a_{n1} & a_{n2} & \cdots & a_{nn}
 
 一个方阵$$M$$的行列式可用于判断其是否可逆：
 
-> * 若$$\det(M) = 0$$，则$$M$$不可逆，即为<span style="color: rgb(100,37,208); background-color: inherit">奇异矩阵</span>，其行或列线性相关，或某行/列为全零
+> 🍰 * 若$$\det(M) = 0$$，则$$M$$不可逆，即为<span style="color: rgb(100,37,208); background-color: inherit">奇异矩阵</span>，其行或列线性相关，或某行/列为全零
 >
 > * 若$$\det(M) \neq 0$$，则$$M$$可逆
 
@@ -83,7 +83,7 @@ GAN 的本质是一场由生成器$$G$$和判别器$$D$$共同参与&#x7684;**<s
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">判别器</span>**$$D$$：扮演侦探角色，<span style="color: rgb(100,37,208); background-color: inherit">接收一个数据样本</span>$$x$$<span style="color: rgb(100,37,208); background-color: inherit">，输出一个标量值</span>$$D(x) \in [0, 1]$$<span style="color: rgb(100,37,208); background-color: inherit">，表示该样本为真实数据的概率</span>。其目标是尽可能准确地区分真实样本与生成样本。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">生成器</span>**$$G$$：扮演伪造者角色，<span style="color: rgb(100,37,208); background-color: inherit">接收一个从先验分布</span>$$z \sim p_z(z)$$<span style="color: rgb(100,37,208); background-color: inherit">中采样的随机噪声向量</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">，将其映射为一个合成样本</span>$$G(z)$$。其目标是生成逼真的数据，使判别器难以分辨真伪。
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">生成器</span>**$$G$$：扮演伪造者角色，<span style="color: rgb(100,37,208); background-color: inherit">接收一个从先验分布</span>$$z \sim p_z(z)$$<span style="color: rgb(100,37,208); background-color: inherit">中采样的随机噪声向量</span>$$z$$<span style="color: rgb(100,37,208); background-color: inherit">，将其映射为一个合成样本</span>$$G(z)$$。其目标是生成逼真的数据，使判别器难以分辨真伪。
 
 这两个网络在对抗中共同进化：<span style="color: rgb(100,37,208); background-color: inherit">生成器越强，生成的样本越真实；判别器越强，识别能力越精准</span>。整个过程其实是一场猫鼠游戏，推动双方性能不断提升。
 
@@ -101,7 +101,7 @@ $$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x)] + \m
 
 从博弈角度理解：
 
-> * 判别器$$D$$<span style="color: rgb(100,37,208); background-color: inherit">试图最大化</span>$$V(D, G)$$，以增强其辨别能力
+> 👍 * 判别器$$D$$<span style="color: rgb(100,37,208); background-color: inherit">试图最大化</span>$$V(D, G)$$，以增强其辨别能力
 >
 > * 生成器$$G$$<span style="color: rgb(100,37,208); background-color: inherit">试图最小化</span>$$V(D, G)$$，从而欺骗判别器
 
@@ -117,15 +117,15 @@ GAN 的训练采&#x7528;**<span style="color: rgb(216,57,49); background-color: 
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">固定生成器，优化判别器</span>**
 >
-> 在每一轮迭代中，首先固定生成器$$G$$，通过梯度上升法最大化价值函数，以增强判别器的判别能力：
+> 👍 在每一轮迭代中，首先固定生成器$$G$$，通过梯度上升法最大化价值函数，以增强判别器的判别能力：
 >
 > $$\nabla_{\theta_d} \frac{1}{m} \sum_{i=1}^m \left[ \log D(x^{(i)}) + \log(1 - D(G(z^{(i)}))) \right]$$
 >
 > 其中，$$x^{(i)} \sim p_{\text{data}}$$为真实样本，$$z^{(i)} \sim p_z$$为噪声输入。此时，判别器执行一个标准的二分类任务：真实样本标签为 1，生成样本标签为 0。
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">固定判别器，优化生成器</span>**
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">固定判别器，优化生成器</span>**
 >
-> 随后固定判别器$$D$$，通过梯度下降法更新生成器参数$$\theta_g$$，使其生成的样本更接近真实分布：
+> 👍 随后固定判别器$$D$$，通过梯度下降法更新生成器参数$$\theta_g$$，使其生成的样本更接近真实分布：
 >
 > $$\nabla_{\theta_g} \frac{1}{m} \sum_{i=1}^m \log(1 - D(G(z^{(i)})))$$
 >

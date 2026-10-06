@@ -75,7 +75,7 @@
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">证据机制</span>**
 >
-> <span style="color: rgb(100,37,208); background-color: inherit">训练时</span>，证据约束能阻止目录标题中的“真皮”“防水”等不可见事实被直接抄进答案；<span style="color: rgb(100,37,208); background-color: inherit">评测时</span>，它把字段正确和视觉支持分开；<span style="color: rgb(100,37,208); background-color: inherit">上线时</span>，缺证据结果可以转人工，而不是直接写入商品库。
+> 💡 <span style="color: rgb(100,37,208); background-color: inherit">训练时</span>，证据约束能阻止目录标题中的“真皮”“防水”等不可见事实被直接抄进答案；<span style="color: rgb(100,37,208); background-color: inherit">评测时</span>，它把字段正确和视觉支持分开；<span style="color: rgb(100,37,208); background-color: inherit">上线时</span>，缺证据结果可以转人工，而不是直接写入商品库。
 
 ### 2.1.3 <span style="color: rgb(36,91,219); background-color: inherit">数据设计</span>
 
@@ -92,7 +92,7 @@ ABO 有 147,702 个商品和 398,212 张目录图，同一商品通常包含主�
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">数据授权</span>**
 >
-> 下载任务保存随包 LICENSE、来源 URL、下载时间、压缩包 SHA-256、许可证 SHA-256 和署名文本。训练清单只接收授权状态明确的 asset\_id；授权变化时按媒体哈希定位并移除相关样本。
+> ❌ 下载任务保存随包 LICENSE、来源 URL、下载时间、压缩包 SHA-256、许可证 SHA-256 和署名文本。训练清单只接收授权状态明确的 asset\_id；授权变化时按媒体哈希定位并移除相关样本。
 
 ### 2.1.4 <span style="color: rgb(36,91,219); background-color: inherit">数据治理</span>
 
@@ -104,7 +104,7 @@ ABO 有 147,702 个商品和 398,212 张目录图，同一商品通常包含主�
 >
 > 3. **<span style="color: rgb(36,91,219); background-color: inherit">商品层</span>**：对带盐的 `group_id` 哈希做稳定切分；主图、侧图、细节图与 360 视图不跨集合。
 >
-> 4. **<span style="color: rgb(36,91,219); background-color: inherit">近重复层</span>**：精确重复按 SHA-256 合并，感知近重复使用固定版本的图像哈希或 Embedding 聚类，跨 split 的簇进入人工复核。
+> 🥛 4. **<span style="color: rgb(36,91,219); background-color: inherit">近重复层</span>**：精确重复按 SHA-256 合并，感知近重复使用固定版本的图像哈希或 Embedding 聚类，跨 split 的簇进入人工复核。
 >
 > 5. **<span style="color: rgb(36,91,219); background-color: inherit">审计层</span>**：输出接受、拒绝和待复核计数，保存数据快照、split salt 与构建脚本 commit。
 
@@ -350,7 +350,7 @@ LLaMA-Factory 和 Qwen finetune 是两条独立训练入口。前者使用 `lora
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">LoRA 加载</span>**
 >
-> `lora_target: all` 可能生成视觉塔和连接器的 adapter 权重。服务启动时枚举实际加载的模块，并用固定图像样本做 adapter 开/关回归；视觉输出没有变化时阻断该版本。
+> 📌 `lora_target: all` 可能生成视觉塔和连接器的 adapter 权重。服务启动时枚举实际加载的模块，并用固定图像样本做 adapter 开/关回归；视觉输出没有变化时阻断该版本。
 
 ### 2.1.8 <span style="color: rgb(36,91,219); background-color: inherit">评测与消融</span>
 
@@ -516,7 +516,7 @@ def route_prediction(prediction: dict[str, Any], media_count: int) -> RouteResul
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">媒体安全</span>**
 >
-> 服务显式设置 `--limit-mm-per-prompt`。远程媒体开启域名白名单并关闭重定向；默认链路由应用层下载、扫描和存储图片，再把受控文件交给推理服务。
+> ❗ 服务显式设置 `--limit-mm-per-prompt`。远程媒体开启域名白名单并关闭重定向；默认链路由应用层下载、扫描和存储图片，再把受控文件交给推理服务。
 
 ### 2.1.10 `简历书写`
 
@@ -524,7 +524,7 @@ def route_prediction(prediction: dict[str, Any], media_count: int) -> RouteResul
 >
 > * 负责商品多视图理解链路，输入主图、细节图和包装图，统一输出类目、颜色、材质、OCR 文本及对应证据位置，处理单图信息缺失和多图属性冲突；
 >
-> * 基于 Qwen3-VL-4B-Instruct 搭建 Zero-Shot 基线，使用 LLaMA-Factory 和 LoRA 完成 SFT，使模型稳定生成约定 JSON，并将属性预测约束在可见证据范围内；
+> 🎁 * 基于 Qwen3-VL-4B-Instruct 搭建 Zero-Shot 基线，使用 LLaMA-Factory 和 LoRA 完成 SFT，使模型稳定生成约定 JSON，并将属性预测约束在可见证据范围内；
 >
 > * 按商品 group\_id 切分数据，评测字段 Exact Match、无依据属性率、证据覆盖率和人工复核率，服务端通过 Schema 校验、置信度阈值和人工复核处理低置信样本。
 

@@ -10,7 +10,7 @@
 
 自编码器由两个网络组成：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Encoder</span>**：将原始的<span style="color: rgb(100,37,208); background-color: inherit">高维输入转换为低维的隐编码</span> latent code，输入维度大于输出维度。
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">Encoder</span>**：将原始的<span style="color: rgb(100,37,208); background-color: inherit">高维输入转换为低维的隐编码</span> latent code，输入维度大于输出维度。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Decoder</span>**：从该<span style="color: rgb(100,37,208); background-color: inherit">编码中恢复数据</span>，通过逐层增大的输出层来实现。
 
@@ -68,7 +68,7 @@ $$L_{\text{SAE}}(\theta) = L(\theta) + \beta \sum_{l=1}^{L} \sum_{j=1}^{s_l} D_{
 
 在 k-稀疏自编码器中，稀疏性是通过仅保留瓶颈层中激活值最高的前$$k$$个值来强制实现的，且该层使用线性激活函数。具体步骤如下：
 
-> 1. 通过编码器进行前向传播，得到压缩后的编码$$\mathbf{z} = g(\mathbf{x})$$。然后对编码向量$$\mathbf{z}$$中的值进行排序，<span style="color: rgb(100,37,208); background-color: inherit">仅保留最大的</span>$$k$$<span style="color: rgb(100,37,208); background-color: inherit">个值，其余神经元的值设为 0</span>。这可以在 ReLU 层中通过调节阈值实现。此时得到一个稀疏化的编码：$$\mathbf{z}' = \text{Sparsify}(\mathbf{z})$$。
+> 👍 1. 通过编码器进行前向传播，得到压缩后的编码$$\mathbf{z} = g(\mathbf{x})$$。然后对编码向量$$\mathbf{z}$$中的值进行排序，<span style="color: rgb(100,37,208); background-color: inherit">仅保留最大的</span>$$k$$<span style="color: rgb(100,37,208); background-color: inherit">个值，其余神经元的值设为 0</span>。这可以在 ReLU 层中通过调节阈值实现。此时得到一个稀疏化的编码：$$\mathbf{z}' = \text{Sparsify}(\mathbf{z})$$。
 >
 > 2. <span style="color: rgb(100,37,208); background-color: inherit">基于稀疏化后的编码计算输出和损失</span>：$$L = \|\mathbf{x} - f(\mathbf{z}')\|_2^2$$。反向传播过程仅通过激活值最高的前$$k$$个隐藏单元进行。
 
@@ -229,7 +229,7 @@ $$D_{\text{KL}}(q_\phi(z|x,y)\parallel p_\theta(z|x,y))=-\int_z q_\phi(z|x,y)\lo
 
 > 1. **<span style="color: rgb(36,91,219); background-color: inherit">联合条件概率</span>**：$$p_\theta(y,z|x)=p_\theta(z|x,y)p_\theta(y|x)$$
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">变形得到真实条件后验</span>**：$$p_\theta(z|x,y)=\frac{p_\theta(y,z|x)}{p_\theta(y|x)}$$
+> 🥇 2. **<span style="color: rgb(36,91,219); background-color: inherit">变形得到真实条件后验</span>**：$$p_\theta(z|x,y)=\frac{p_\theta(y,z|x)}{p_\theta(y|x)}$$
 
 将第 2 步的等式代入 KL 散度公式中 ：
 
@@ -265,7 +265,7 @@ $$\begin{aligned}
 >
 > 这是 Sohn 等人在 2015 年论文中提出的标准架构
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">特点</span>：**&#x9690;空间的先验分布$$p_\theta(z|x)$$是通过一个先验网络动态学习出来的，该网络仅输入条件$$x$$。
+> 🎼 * **<span style="color: rgb(36,91,219); background-color: inherit">特点</span>：**&#x9690;空间的先验分布$$p_\theta(z|x)$$是通过一个先验网络动态学习出来的，该网络仅输入条件$$x$$。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">训练阶段</span>**
 >
@@ -285,7 +285,7 @@ $$\begin{aligned}
 >
 > 这是目前图像生成中最常用的工业级简化方案
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">特点</span>：**&#x5C06;条件先验分布直接强行退化简化为与条件无关的标准高斯先验，即$$p(z|x)=p(z)=\mathcal{N}(0,I)$$ 。条件$$c$$被以拼接的形式注入编码器和解码器中。
+> 📍 * **<span style="color: rgb(36,91,219); background-color: inherit">特点</span>：**&#x5C06;条件先验分布直接强行退化简化为与条件无关的标准高斯先验，即$$p(z|x)=p(z)=\mathcal{N}(0,I)$$ 。条件$$c$$被以拼接的形式注入编码器和解码器中。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">训练阶段</span>**
 >
@@ -331,7 +331,7 @@ $$\mathcal{L}_{\text{KL}}=D_{\text{KL}}(q_\phi(z|x,c)\parallel\mathcal{N}(0,I))=
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">编码器端</span>：**&#x5148;将$$c$$扩展为与图像空间尺寸一致的张量$$B\times C\times H\times W$$，然后在通道维度进行拼接，形成$$B\times (C + K)\times H\times W$$维度的张量输入卷积网络。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">解码器端</span>：**&#x9690;向量$$z$$维度为$$B\times 64$$（例如隐空间大小设为 64），可直接在特征维度与$$c$$的 One-Hot 向量拼接，得到$$B\times 74$$维度的向量，输入解码器的全连接层或转置卷积层。
+> ⚽ * **<span style="color: rgb(36,91,219); background-color: inherit">解码器端</span>：**&#x9690;向量$$z$$维度为$$B\times 64$$（例如隐空间大小设为 64），可直接在特征维度与$$c$$的 One-Hot 向量拼接，得到$$B\times 74$$维度的向量，输入解码器的全连接层或转置卷积层。
 
 **<span style="color: rgb(36,91,219); background-color: inherit">可学习条件 Embedding</span>**
 
@@ -343,7 +343,7 @@ $$e_c = \text{Embedding}(c)$$
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">语义空间泛化</span>**：模型在训练中能够自动学习到条件之间的语义关联，例如数字 "3" 和数字 "8" 的 Embedding 向量在欧氏空间中距离更近，从而生成过渡更加平滑的重构样本。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">动态增量扩展</span>**：当遇到训练集中从未出现过的新类别条件时，可以冻结已经训练好的编码器和解码器权重，仅针对新条件的 Embedding 向量进行增量参数微调，从而在不破坏已有生成效果的前提下，赋予模型生成新事物的能力。
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">动态增量扩展</span>**：当遇到训练集中从未出现过的新类别条件时，可以冻结已经训练好的编码器和解码器权重，仅针对新条件的 Embedding 向量进行增量参数微调，从而在不破坏已有生成效果的前提下，赋予模型生成新事物的能力。
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">CVAE 条件后验崩溃</span>**
 
@@ -444,11 +444,11 @@ $$C(t) = \min \left( C_{\max}, \frac{t}{T_{\text{anneal}}} \cdot C_{\max} \right
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">高保真与解耦兼得</span>**
 
-> - **<span style="color: rgb(36,91,219); background-color: inherit">第一阶段</span>$$C=0$$**：信道处于几乎闭合的状态。由于没有任何带宽去承载复杂的纹理，网络为了尽可能挣扎着降低重构误差，会<span style="color: rgb(100,37,208); background-color: inherit">被迫选择使用极其珍贵的一点带宽去建模对重构贡献最大、信息量占比最高的最粗糙全局几何因子</span>**，**&#x4F8B;如物体的空间$$x, y$$坐标轴位置。 &#x20;
+> 🥇 - **<span style="color: rgb(36,91,219); background-color: inherit">第一阶段</span>$$C=0$$**：信道处于几乎闭合的状态。由于没有任何带宽去承载复杂的纹理，网络为了尽可能挣扎着降低重构误差，会<span style="color: rgb(100,37,208); background-color: inherit">被迫选择使用极其珍贵的一点带宽去建模对重构贡献最大、信息量占比最高的最粗糙全局几何因子</span>**，**&#x4F8B;如物体的空间$$x, y$$坐标轴位置。 &#x20;
 >
 > - **<span style="color: rgb(36,91,219); background-color: inherit">第二阶段</span>$$C$$<span style="color: rgb(36,91,219); background-color: inherit"> 逐渐变大</span>**：粗糙的全局因子已经稳定占据了前几个隐通道。随着信道变宽，多余的带宽被释放出来，网络开始腾出空间去逐层建模中高频的局部因子，如旋转角度、比例大小、微观细节。 &#x20;
 >
-> - **<span style="color: rgb(36,91,219); background-color: inherit">最终状态</span>：**<span style="color: rgb(100,37,208); background-color: inherit">所有的物理因子已经按照信息量的大小，在隐空间中排好队、依次对齐并占领了不同的维度</span>。当$$C$$达到最大时，高频细节得以完美恢复，而且由于前期依次占位的设计，原有的解耦格局没有被破坏。 &#x20;
+> 🥇 - **<span style="color: rgb(36,91,219); background-color: inherit">最终状态</span>：**<span style="color: rgb(100,37,208); background-color: inherit">所有的物理因子已经按照信息量的大小，在隐空间中排好队、依次对齐并占领了不同的维度</span>。当$$C$$达到最大时，高频细节得以完美恢复，而且由于前期依次占位的设计，原有的解耦格局没有被破坏。 &#x20;
 
 这种<span style="color: rgb(46,161,33); background-color: inherit">渐进式的信息注入方法，近乎完美地平衡了表征解耦与高清重构</span>。
 
@@ -498,7 +498,7 @@ $$\sigma_q^{(l)}(z_{<l}, x) = \sigma_p^{(l)}(z_{<l}) \odot \Delta\sigma^{(l)}(z_
 
 **<span style="color: rgb(36,91,219); background-color: inherit">为什么残差参数化能极大稳定训练？</span>**
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">天然的先验贴合初始化</span>**：在训练初始阶段，当神经网络权重初始化为接近 0 的随机值时，相对偏差项$$\Delta\mu \approx 0$$且$$\Delta\sigma \approx 1$$。此时，后验分布在数学上极其自然地贴合了移动先验分布，即$$q(z_l \vert \cdot) \approx p(z_l \vert \cdot)$$。这<span style="color: rgb(46,161,33); background-color: inherit">使得在最不稳定的训练初期，变分 KL 散度项天然接近 0，彻底规避了训练初期的数值溢出</span>。
+> 🍞 * **<span style="color: rgb(36,91,219); background-color: inherit">天然的先验贴合初始化</span>**：在训练初始阶段，当神经网络权重初始化为接近 0 的随机值时，相对偏差项$$\Delta\mu \approx 0$$且$$\Delta\sigma \approx 1$$。此时，后验分布在数学上极其自然地贴合了移动先验分布，即$$q(z_l \vert \cdot) \approx p(z_l \vert \cdot)$$。这<span style="color: rgb(46,161,33); background-color: inherit">使得在最不稳定的训练初期，变分 KL 散度项天然接近 0，彻底规避了训练初期的数值溢出</span>。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">减小缺口</span>**：由于后验分布的预测基准直接锚定在先验上，推断网络只需要专注于学习数据与先验之间最难对齐的细微相对偏差，<span style="color: rgb(46,161,33); background-color: inherit">极大地降低了摊销梯度估计的变益，保证了极深分层自编码器在端到端联合训练时的数学鲁棒性</span>。
 
@@ -518,7 +518,7 @@ $$\gamma_l \propto s_l \cdot \mathbb{E}_{x \sim \mathcal{M}}\left[\mathbb{E}_{q(
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">小 KL 组</span>**：分配到较小的平衡系数$$\gamma_l$$，降低对其信息压缩的惩罚，迫使模型在该层开始活跃地注入信息。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">大 KL 组</span>**：分配到较大的平衡系数，加强压缩惩罚，防止其在单一尺度上过度纠缠。在 KL 温控预热完成后，所有$$\gamma_l$$均重置为 1，以严格维护证据下界的概率严谨性。
+> 🥇 * **<span style="color: rgb(36,91,219); background-color: inherit">大 KL 组</span>**：分配到较大的平衡系数，加强压缩惩罚，防止其在单一尺度上过度纠缠。在 KL 温控预热完成后，所有$$\gamma_l$$均重置为 1，以严格维护证据下界的概率严谨性。
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">物理与几何平滑：谱正则化</span>**
 
@@ -552,7 +552,7 @@ $$\sigma(W_i) = \max_{v \ne 0} \frac{\|W_i v\|_2}{\|v\|_2}$$&#x20;
 
 > 1. **<span style="color: rgb(36,91,219); background-color: inherit">深度可分离卷积</span>**
 >
->    由于 VAE 在处理高清重构时需要捕捉大尺度的空间长程关联，必须拥有极大的感受野。NVAE 在生成模型中全面采用$$5\times5$$的深度可分离卷积。这使得网络感受野得以呈指数级迅速扩张，而参数量和计算量相比标准卷积仅有极小部分的增加，从而极大地缓解了深层 VAE 内存爆炸的瓶颈。
+>    🎁 由于 VAE 在处理高清重构时需要捕捉大尺度的空间长程关联，必须拥有极大的感受野。NVAE 在生成模型中全面采用$$5\times5$$的深度可分离卷积。这使得网络感受野得以呈指数级迅速扩张，而参数量和计算量相比标准卷积仅有极小部分的增加，从而极大地缓解了深层 VAE 内存爆炸的瓶颈。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">批归一化的平反</span>**
 >
@@ -584,7 +584,7 @@ $$\mathbf{z}_q(\mathbf{x}) = \text{Quantize}(E(\mathbf{x})) = \mathbf{e}_k \quad
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">VQ 损失</span>**：嵌入空间与编码器输出之间的 L2 误差
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Commitment 损失</span>**：用于鼓励编码器输出保持接近嵌入空间，并防止其在不同码向量之间频繁波动
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">Commitment 损失</span>**：用于鼓励编码器输出保持接近嵌入空间，并防止其在不同码向量之间频繁波动
 
 总损失函数如下：
 
@@ -608,7 +608,7 @@ VQ-VAE-2 是一个结合了自注意力自回归模型的两层层次化 VQ-VAE�
 
 
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">Step 1</span>**：<span style="color: rgb(100,37,208); background-color: inherit">训练一个层次化的 VQ-VAE</span>。设计层次化潜在变量的目的是将局部模式（如纹理）与全局信息（如物体形状）分离。较大底层 codebook 的训练依赖于较小的顶层 code，因此它不需要从头开始学习所有内容。
+> 👍 1. **<span style="color: rgb(36,91,219); background-color: inherit">Step 1</span>**：<span style="color: rgb(100,37,208); background-color: inherit">训练一个层次化的 VQ-VAE</span>。设计层次化潜在变量的目的是将局部模式（如纹理）与全局信息（如物体形状）分离。较大底层 codebook 的训练依赖于较小的顶层 code，因此它不需要从头开始学习所有内容。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">Step 2</span>**：<span style="color: rgb(100,37,208); background-color: inherit">在潜在离散码本上学习一个先验分布</span>，以便从中采样并生成图像。解码器接收来自与训练时相似分布的输入向量。一个强大的自回归模型，结合多头自注意力层，用于捕捉先验分布
 
@@ -632,7 +632,7 @@ RQ-VAE 创新地引入了<span style="color: rgb(216,57,49); background-color: i
 
 对向量$$z$$的残差量化过程是在深度$$d = 1, \dots, D$$上逐级迭代进行的：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">初始化</span>**：设初始累计重构向量为$$\hat{z}^{(0)} = 0$$。初始输入残差向量为$$r_1 = z$$。
+> 📍 * **<span style="color: rgb(36,91,219); background-color: inherit">初始化</span>**：设初始累计重构向量为$$\hat{z}^{(0)} = 0$$。初始输入残差向量为$$r_1 = z$$。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">在每一级深度</span>$$d$$<span style="color: rgb(36,91,219); background-color: inherit">处</span>**：
 >
@@ -668,7 +668,7 @@ $$\hat{z}^{(D)} = \sum_{d=1}^D e(k_d)$$
 
 对于整张输入图像$$X$$，RQ-VAE 会在空间分辨率大幅降低的格点上进行残差量化：
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">下采样</span>**：例如，对于$$256\times256$$像素的输入图像，通过包含 aggressive 跨步卷积的编码器，下采样 32 倍，输出仅为$$8\times8$$分辨率的特征图$$Z$$。
+> 🍞 1. **<span style="color: rgb(36,91,219); background-color: inherit">下采样</span>**：例如，对于$$256\times256$$像素的输入图像，通过包含 aggressive 跨步卷积的编码器，下采样 32 倍，输出仅为$$8\times8$$分辨率的特征图$$Z$$。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">空间矢量量化</span>**：对$$8\times8$$上的每一个格点进行$$D$$深度的残差量化，得到三维代码图$$M \in [K]^{8 \times 8 \times 4}$$。
 >
@@ -694,13 +694,13 @@ RQ-VAE 采用两大类训练更新方案，二者对 tripartite 损失函数的�
 >
 > * **$$\mathcal{L}_{\text{rec}}$$<span style="color: rgb(36,91,219); background-color: inherit"> 重构损失</span>**：通常为 MSE 损失$$\| X - \hat{X} \|_2^2$$，用于训练编码器和解码器。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">Codebook 损失</span>**：通过 stop-gradient 算&#x5B50;**`sg`**&#x51BB;结编码器产生的残差$$r_d$$，梯度仅流向选中的 Codebook 向量$$e(k_d)$$，用于将其拉向编码残差。
+> ⚽ * **<span style="color: rgb(36,91,219); background-color: inherit">Codebook 损失</span>**：通过 stop-gradient 算&#x5B50;**`sg`**&#x51BB;结编码器产生的残差$$r_d$$，梯度仅流向选中的 Codebook 向量$$e(k_d)$$，用于将其拉向编码残差。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">Commitment 损失</span>**：冻结选中的 Codebook 向量，梯度流向编码器，迫使编码器输出稳定且不频繁波动的残差。$$\beta$$是控制该约束强度的超参数。
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">方案二：基于指数移动平均 EMA 的无梯度优化，最常用</span>**
 >
-> 在工业界和官方开源实现中，为了保证超深递归下的数值稳定性， Codebook 通常通过 EMA 无梯度更新。此时，直接对所有深度处的中间重构求和并施加整体承诺约束：
+> 🌟 在工业界和官方开源实现中，为了保证超深递归下的数值稳定性， Codebook 通常通过 EMA 无梯度更新。此时，直接对所有深度处的中间重构求和并施加整体承诺约束：
 >
 > $$\mathcal{L}_{\text{EMA-RQ-VAE}} = \| X - G(\hat{Z}^{(D)}) \|_2^2 + \beta \sum_{d=1}^D \| Z - \text{sg}[\hat{Z}^{(d)}] \|_2^2$$
 
@@ -724,7 +724,7 @@ $$z_q = \arg\min_{b_k \in \mathcal{B}} \|\hat{z} - b_k\|_2^2$$
 
 > 1. **<span style="color: rgb(36,91,219); background-color: inherit">不可微性</span>**：其导数处处为 0，反向传播不得不依赖直通估计器 STE 进行硬性复制，引入了极大的梯度偏差。
 >
-> 2. **<span style="color: rgb(36,91,219); background-color: inherit">Codebook 崩溃</span>**：由于硬性划分，初始状态下未被选中的代码向量永远无法获得梯度，从而迅速沦为死代码。为了维持训练，研究者不得不诉诸于指数移动平均更新、死码随机重置等工程 trick。
+> 🥛 2. **<span style="color: rgb(36,91,219); background-color: inherit">Codebook 崩溃</span>**：由于硬性划分，初始状态下未被选中的代码向量永远无法获得梯度，从而迅速沦为死代码。为了维持训练，研究者不得不诉诸于指数移动平均更新、死码随机重置等工程 trick。
 
 SQ-VAE 提出，<span style="color: rgb(100,37,208); background-color: inherit">量化和逆量化在本质上是一对互逆的随机概率过程。通过在隐空间引入随机概率瓶颈，SQ-VAE 成功让离散自编码器摆脱了对所有非贝叶斯启发式技巧的依赖</span>。
 
@@ -746,7 +746,7 @@ SQ-VAE 建立在连续隐变量$$z \in \mathbb{R}^D$$与离散隐变量$$z_q \in
 
 $$p_{\theta, \phi}(x, z, z_q) = p_\theta(x | z) p_\phi(z | z_q) p(z_q)$$
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">离散先验分布</span>$$p(z_q)$$**：假定每个 Codebook 向量被抽取的概率是均匀的：
+> 🍞 * **<span style="color: rgb(36,91,219); background-color: inherit">离散先验分布</span>$$p(z_q)$$**：假定每个 Codebook 向量被抽取的概率是均匀的：
 >
 > $$p(z_q = b_k) = \frac{1}{K}$$
 >
@@ -764,7 +764,7 @@ $$q_{\omega, \phi}(z, z_q | x) = q_\phi(z_q | z) q_\omega(z | x)$$
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">随机量化分布</span>$$q_\phi(z_q | z)$$**：
 >
->   在贝叶斯框架下，量化过程$$q_\phi(z_q | z)$$并不是随意指定的，它必须是反量化分布$$p_\phi(z | z_q)$$的贝叶斯后验形式：
+>   🌅 在贝叶斯框架下，量化过程$$q_\phi(z_q | z)$$并不是随意指定的，它必须是反量化分布$$p_\phi(z | z_q)$$的贝叶斯后验形式：
 >
 > $$q_\phi(z_q = b_k | z) = \frac{p_\phi(z | z_q = b_k) p(z_q = b_k)}{\sum_{j=1}^K p_\phi(z | z_q = b_j) p(z_q = b_j)}$$
 
@@ -814,7 +814,7 @@ $$q_\phi(z_q = b_k | z) = \frac{\exp\left( -\frac{1}{2\sigma_\phi^2} \|z - b_k\|
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">梯度反向传播实现</span>**
 >
-> 这是一个关于负欧氏距离的 Softmax 分&#x5E03;**，**&#x5728;工程实现中，将其视作一个多分类概率，<span style="color: rgb(100,37,208); background-color: inherit">通过引入 Gumbel-Softmax 重参数化技巧，实现连续可微的离散采样与端到端梯度回传</span>：
+> 📌 这是一个关于负欧氏距离的 Softmax 分&#x5E03;**，**&#x5728;工程实现中，将其视作一个多分类概率，<span style="color: rgb(100,37,208); background-color: inherit">通过引入 Gumbel-Softmax 重参数化技巧，实现连续可微的离散采样与端到端梯度回传</span>：
 >
 > $$w_k = \frac{\exp\left( \frac{-\|z - b_k\|_2^2 / 2\sigma_\phi^2 + g_k}{\tau} \right)}{\sum_{j=1}^K \exp\left( \frac{-\|z - b_j\|_2^2 / 2\sigma_\phi^2 + g_j}{\tau} \right)}, \quad \text{其中 } g_k \sim \text{Gumbel}(0, 1)$$
 
@@ -868,7 +868,7 @@ $$\lim_{\sigma_\phi^2 \to 0} q_\phi(z_q = b_k | z) = \lim_{\sigma_\phi^2 \to 0} 
 
 在传统的分层离散模型中，由于采用硬性的、确定性的最近邻检索$$\arg\min$$，计算图梯度在量化算子处断裂，不得不引入直通估计器 STE 进行硬性梯度复制。这种非概率的设计导致了两个严重瓶颈：
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">Codebook/Layer Collapse</span>**：靠近顶部的层级极易为了逃避训练惩罚而彻底停用，或者只更新 Codebook 中极小的一部分向量。
+> 🎹 1. **<span style="color: rgb(36,91,219); background-color: inherit">Codebook/Layer Collapse</span>**：靠近顶部的层级极易为了逃避训练惩罚而彻底停用，或者只更新 Codebook 中极小的一部分向量。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">重度依赖启发式 Trick</span>**：为了维持训练，模型极度依赖于指数移动平均 EMA 更新、死码随机重置、手动调节的通道容量等工程 Trick。
 
@@ -886,7 +886,7 @@ $$q(Z = k \vert \tilde{z}) = \frac{\exp(-\beta \|\tilde{z} - b_k\|_2^2)}{\sum_{j
 
 > * **<span style="color: rgb(36,91,219); background-color: inherit">训练初期</span>**：$$\beta$$较小，分布熵较高，量化呈现高度随机的软选择状态。这保证了 Codebook 中的每一个向量在初始阶段都能均匀分得概率，并获得充足的变分梯度滋养，从而<span style="color: rgb(46,161,33); background-color: inherit">在物理上天然杜绝了死码的产生</span>。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">训练后期</span>**：在最大化变分下界 ELBO 的梯度本能驱使下，网络会自发收缩量化方差，即$$\beta \to \infty$$。后验概率分布自动凝敛为狄拉克$$\delta$$分布，平滑地过渡到确定性硬量化。这种退火过程是<span style="color: rgb(46,161,33); background-color: inherit">完全自动且无损的，不需要任何人手动设定复杂的退火调度表</span>。
+> 🌰 * **<span style="color: rgb(36,91,219); background-color: inherit">训练后期</span>**：在最大化变分下界 ELBO 的梯度本能驱使下，网络会自发收缩量化方差，即$$\beta \to \infty$$。后验概率分布自动凝敛为狄拉克$$\delta$$分布，平滑地过渡到确定性硬量化。这种退火过程是<span style="color: rgb(46,161,33); background-color: inherit">完全自动且无损的，不需要任何人手动设定复杂的退火调度表</span>。
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">统一变分贝叶斯框架</span>**
 
@@ -900,7 +900,7 @@ HQ-VAE 在数学上设计了一套完备的双向推断流，将上述随机量�
 >
 > $$\mathcal{P}(Z_{1:L}, \tilde{Z}_{1:L}) = \prod_{l=1}^L P(Z_l) p(\tilde{Z}_l \vert Z_{1:l-1})$$
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">近似后验模型 Bottom-up Path</span>**：
+> 💡 * **<span style="color: rgb(36,91,219); background-color: inherit">近似后验模型 Bottom-up Path</span>**：
 >
 > $$Q(Z_{1:L}, \tilde{Z}_{1:L} \vert x) = \prod_{l=1}^L Q(Z_l \vert \tilde{Z}_l) q(\tilde{Z}_l \vert x, Z_{1:l-1})$$
 
@@ -924,7 +924,7 @@ SQ-VAE-2 是分层空间多分辨率离散网络 VQ-VAE-2 在概率变分框架�
 
 > **<span style="color: rgb(36,91,219); background-color: inherit">机制</span>**：它沿空间物理尺寸划分层级。
 >
-> * **<span style="color: rgb(36,91,219); background-color: inherit">编码端</span>**：输入图像先提取细分辨率特&#x5F81;**`Bottom Level`**，再进一步下采样提取粗糙全局特&#x5F81;**`Top Level`**，各层执行独立的随机量化。
+> 🍞 * **<span style="color: rgb(36,91,219); background-color: inherit">编码端</span>**：输入图像先提取细分辨率特&#x5F81;**`Bottom Level`**，再进一步下采样提取粗糙全局特&#x5F81;**`Top Level`**，各层执行独立的随机量化。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">解码端</span>**：顶层量化特征$$Z_{\text{top}}$$作为先验，被上采样并通道拼接注入到底层的连续后验中，以此约束底层仅聚焦于高频细节重建。
 
@@ -938,7 +938,7 @@ $$\mathcal{J}_{\text{SQ-VAE-2}} = -\mathbb{E}_Q[\log p_\theta(x \vert Z_{1:L})] 
 
 RSQ-VA&#x45;**&#x20;**&#x662F; Kakao Brain CVPR 2022 提出的 RQ-VAE 在变分框架下的泛化。
 
-> **<span style="color: rgb(36,91,219); background-color: inherit">机制</span>：**&#x5B83;不改变空间分辨率，而是沿隐通道深度逐层逼近。对于当前层$$l$$，输入编码器是前$$l-1$$层的累积量化误差，即残差$$R_{l-1}$$：
+> 💡 **<span style="color: rgb(36,91,219); background-color: inherit">机制</span>：**&#x5B83;不改变空间分辨率，而是沿隐通道深度逐层逼近。对于当前层$$l$$，输入编码器是前$$l-1$$层的累积量化误差，即残差$$R_{l-1}$$：
 >
 > $$R_{l-1} = E_\phi(x) - \sum_{i=1}^{l-1} Z_i$$
 >
@@ -1008,7 +1008,7 @@ $$\begin{aligned}
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">蓝色项</span>**：根据马尔可夫假设进行展开
 >
-> * **<span style="color: rgb(46,161,33); background-color: inherit">绿色项</span>**：扩展以包含向过去的一步预测作为平滑分布
+> 👍 * **<span style="color: rgb(46,161,33); background-color: inherit">绿色项</span>**：扩展以包含向过去的一步预测作为平滑分布
 
 展开讲就是需要学习四种类型的分布：
 

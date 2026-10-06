@@ -10,7 +10,7 @@
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">核心思想</span>**
 
-> **ViT&#x20;**&#x7684;核心命题是：<span style="color: rgb(100,37,208); background-color: inherit">抛弃卷积操作，将图像视为由图像块 patch 组成的序列，通过自注意力机制实现全局交互</span>。其突破性在于证明：<span style="color: rgb(46,161,33); background-color: inherit">当训练数据足够庞大时，如</span>**`JFT-300M`**<span style="color: rgb(46,161,33); background-color: inherit">，无空间先验的纯 Transformer 架构可超越 CNN</span>。
+> 🥖 **ViT&#x20;**&#x7684;核心命题是：<span style="color: rgb(100,37,208); background-color: inherit">抛弃卷积操作，将图像视为由图像块 patch 组成的序列，通过自注意力机制实现全局交互</span>。其突破性在于证明：<span style="color: rgb(46,161,33); background-color: inherit">当训练数据足够庞大时，如</span>**`JFT-300M`**<span style="color: rgb(46,161,33); background-color: inherit">，无空间先验的纯 Transformer 架构可超越 CNN</span>。
 
 传统的卷积神经网络通过局部感受野和权重共享机制来提取图像特征，而 **ViT&#x20;**&#x5219;另辟蹊径，采用了一种全新的思路：<span style="color: rgb(100,37,208); background-color: inherit">将图像视为</span>**<span style="color: rgb(100,37,208); background-color: inherit">词序列</span>**。具体来说，**<span style="color: rgb(100,37,208); background-color: inherit">ViT</span>**<span style="color: rgb(100,37,208); background-color: inherit"> 首先将输入图像分割成固定大小的小块 Patches，每个小块被视为一个</span>**<span style="color: rgb(100,37,208); background-color: inherit">词</span>**<span style="color: rgb(100,37,208); background-color: inherit">或 </span>**<span style="color: rgb(100,37,208); background-color: inherit">token</span>**。例如，<span style="color: rgb(220,155,4); background-color: inherit">对于一张分辨率为</span>**`224×224`**<span style="color: rgb(220,155,4); background-color: inherit">的RGB图像，若每个 Patch 的大小为</span>**`16×16`**<span style="color: rgb(220,155,4); background-color: inherit">，则整张图像会被划分为</span>**`196`**<span style="color: rgb(220,155,4); background-color: inherit">个 Patch</span>。<span style="color: rgb(100,37,208); background-color: inherit">这些 Patch 随后被展平并嵌入到高维空间中，形成一个类似于 NLP 中词嵌入的表示形式</span>。
 
@@ -18,7 +18,7 @@
 
 位置编码的设计有多种实现方式，主要分为两类：
 
-> 1. 基于固定算法生成的<span style="color: rgb(100,37,208); background-color: inherit">正余弦函数编码</span>，类似于原始 Transformer 中的实现
+> ⛱️ 1. 基于固定算法生成的<span style="color: rgb(100,37,208); background-color: inherit">正余弦函数编码</span>，类似于原始 Transformer 中的实现
 >
 > 2. <span style="color: rgb(100,37,208); background-color: inherit">可学习的位置编码</span>
 
@@ -34,7 +34,7 @@
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">位置编码</span>**：由于 Transformer 本身不具备对输入顺序的感知能力，**ViT** 引入了可学习的位置编码，用于捕捉 Patch 之间的空间关系。这些位置编码与 Patch embedding 相加后，作为 Transformer 的输入。这里需要注意的是，<span style="color: rgb(100,37,208); background-color: inherit">位置编码的长度与 patch 的数量相同，因此它的维度也受到图像分辨率的影响</span>。
 >
-> 3) **<span style="color: rgb(36,91,219); background-color: inherit">Transformer Encoder</span>**：**ViT** 的核心是一个标准的 Transformer Encoder，包含多头自注意力机制 **<span style="color: rgb(216,57,49); background-color: inherit">MHSA</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">M</span>**<span style="color: rgb(216,57,49); background-color: inherit">ulti-</span>**<span style="color: rgb(216,57,49); background-color: inherit">H</span>**<span style="color: rgb(216,57,49); background-color: inherit">ead </span>**<span style="color: rgb(216,57,49); background-color: inherit">S</span>**<span style="color: rgb(216,57,49); background-color: inherit">elf-</span>**<span style="color: rgb(216,57,49); background-color: inherit">A</span>**<span style="color: rgb(216,57,49); background-color: inherit">ttention）</span>和前馈神经网络 **<span style="color: rgb(216,57,49); background-color: inherit">FFN</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">F</span>**<span style="color: rgb(216,57,49); background-color: inherit">eed-</span>**<span style="color: rgb(216,57,49); background-color: inherit">F</span>**<span style="color: rgb(216,57,49); background-color: inherit">orward </span>**<span style="color: rgb(216,57,49); background-color: inherit">N</span>**<span style="color: rgb(216,57,49); background-color: inherit">etwork）</span>。<span style="color: rgb(100,37,208); background-color: inherit">通过多层堆叠，Transformer 能够捕捉图像全局的上下文信息，从而实现对复杂模式的学习</span>。每一层的输出都会通过残差连接 Residual Connection 和层归一化 Layer Normalization 进行优化，以提高训练的稳定性和收敛速度。
+> 👍 3) **<span style="color: rgb(36,91,219); background-color: inherit">Transformer Encoder</span>**：**ViT** 的核心是一个标准的 Transformer Encoder，包含多头自注意力机制 **<span style="color: rgb(216,57,49); background-color: inherit">MHSA</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">M</span>**<span style="color: rgb(216,57,49); background-color: inherit">ulti-</span>**<span style="color: rgb(216,57,49); background-color: inherit">H</span>**<span style="color: rgb(216,57,49); background-color: inherit">ead </span>**<span style="color: rgb(216,57,49); background-color: inherit">S</span>**<span style="color: rgb(216,57,49); background-color: inherit">elf-</span>**<span style="color: rgb(216,57,49); background-color: inherit">A</span>**<span style="color: rgb(216,57,49); background-color: inherit">ttention）</span>和前馈神经网络 **<span style="color: rgb(216,57,49); background-color: inherit">FFN</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">F</span>**<span style="color: rgb(216,57,49); background-color: inherit">eed-</span>**<span style="color: rgb(216,57,49); background-color: inherit">F</span>**<span style="color: rgb(216,57,49); background-color: inherit">orward </span>**<span style="color: rgb(216,57,49); background-color: inherit">N</span>**<span style="color: rgb(216,57,49); background-color: inherit">etwork）</span>。<span style="color: rgb(100,37,208); background-color: inherit">通过多层堆叠，Transformer 能够捕捉图像全局的上下文信息，从而实现对复杂模式的学习</span>。每一层的输出都会通过残差连接 Residual Connection 和层归一化 Layer Normalization 进行优化，以提高训练的稳定性和收敛速度。
 >
 > 4) **<span style="color: rgb(36,91,219); background-color: inherit">分类头</span>**：在 Transformer 的最后一层输出中，ViT 引入了一个特殊的分类 Token：**`Class Token`**，用于汇总整个图像的信息。这个 Token 在输入时被插入到 Patch 序列的最前端，并与其他 Patch 一起参与 Transformer 的计算。最终，分类 Token 的输出经过一个全连接层后，生成最终的分类预测结果。
 
@@ -66,7 +66,7 @@ z_{\ell} &= \text{MLP}(\text{LN}(z_{\ell}')) + z_{\ell}', \quad \ell = 1 \ldots 
 
 > **ViT&#x20;**&#x5BF9;大规模预训练数据的需求较高，在小数据集上容易过拟合
 >
-> **ViT&#x20;**&#x7684;计算复杂度随着图像分辨率的增加而急剧上升，这限制了其在高分辨率图像任务中的应用
+> ⛱️ **ViT&#x20;**&#x7684;计算复杂度随着图像分辨率的增加而急剧上升，这限制了其在高分辨率图像任务中的应用
 
 为了解决这些问题，研究者们提出了多种改进方案。例如，**<span style="color: rgb(216,57,49); background-color: inherit">PVT</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">P</span>**<span style="color: rgb(216,57,49); background-color: inherit">yramid </span>**<span style="color: rgb(216,57,49); background-color: inherit">V</span>**<span style="color: rgb(216,57,49); background-color: inherit">ision </span>**<span style="color: rgb(216,57,49); background-color: inherit">T</span>**<span style="color: rgb(216,57,49); background-color: inherit">ransformer）</span>和 <span style="color: rgb(216,57,49); background-color: inherit">Swin Transformer</span> <span style="color: rgb(220,155,4); background-color: inherit">等模型通过引入金字塔结构和局部窗口注意力机制，显著降低了计算开销，同时提升了模型的灵活性</span>。此外，<span style="color: rgb(100,37,208); background-color: inherit">结合 CNN 和 Transformer 的混合架构也被证明是一种有效的策略，能够在保持 </span>**<span style="color: rgb(100,37,208); background-color: inherit">ViT </span>**<span style="color: rgb(100,37,208); background-color: inherit">全局建模能力的同时，利用 CNN 的局部特征提取优势</span>。
 
@@ -150,7 +150,7 @@ DeiT 验证了蒸馏 Token 确实为模型带来了额外的价值：作者尝�
 
 **DeiT&#x20;**&#x7684;技术亮点主要体现在以下几个方面：
 
-> 1. **<span style="color: rgb(36,91,219); background-color: inherit">基于 Token 的知识蒸馏</span>**：**DeiT&#x20;**&#x901A;过引入一个特殊的**蒸馏 Token** 来捕获教师模型的知识。**DeiT&#x20;**&#x5728;输入序列中添加了一个额外的 Token，用于表示教师模型的预测分布。这种方法<span style="color: rgb(46,161,33); background-color: inherit">不仅保留了原始 Transformer 的结构，还显著提高了模型的泛化能力</span>。相比于传统的软标签蒸馏方法，基于 Token 的蒸馏更加灵活，能够更好地适应 Transformer 的架构特点。
+> 🍞 1. **<span style="color: rgb(36,91,219); background-color: inherit">基于 Token 的知识蒸馏</span>**：**DeiT&#x20;**&#x901A;过引入一个特殊的**蒸馏 Token** 来捕获教师模型的知识。**DeiT&#x20;**&#x5728;输入序列中添加了一个额外的 Token，用于表示教师模型的预测分布。这种方法<span style="color: rgb(46,161,33); background-color: inherit">不仅保留了原始 Transformer 的结构，还显著提高了模型的泛化能力</span>。相比于传统的软标签蒸馏方法，基于 Token 的蒸馏更加灵活，能够更好地适应 Transformer 的架构特点。
 >
 > 2. **<span style="color: rgb(36,91,219); background-color: inherit">混合教师模型</span>**：在蒸馏过程中，**DeiT&#x20;**&#x91C7;用了一种混合教师模型的策略。它结合了卷积神经网络和 Transformer 模型的优点，利用卷积网络的局部特征提取能力和 Transformer 的全局建模能力，生成高质量的指导信号。这种跨模态的蒸馏方式<span style="color: rgb(46,161,33); background-color: inherit">不仅提升了学生模型的性能，还为多模态学习提供了新的思路</span>。
 >

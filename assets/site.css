@@ -376,6 +376,20 @@ button, input, select { font: inherit; }
   color: #404a5c;
 }
 
+/* Feishu callouts: blockquotes that begin with an emoji become cards. */
+#article blockquote.vlm-callout {
+  padding: 11px 16px;
+  border-left-width: 4px;
+  border-radius: 4px 12px 12px 4px;
+  background: var(--accent-soft);
+  color: var(--text);
+}
+#article blockquote.vlm-callout .callout-emoji {
+  margin-right: 6px;
+  font-size: 1.08em;
+}
+#article blockquote.vlm-callout blockquote { background: none; }
+
 #article code {
   padding: 1px 5px;
   border-radius: 4px;
@@ -383,13 +397,48 @@ button, input, select { font: inherit; }
   font: .88em var(--mono);
 }
 
-#article pre {
-  overflow: auto;
+/* Code frame: a labelled box with a copy button, like the Feishu export. */
+#article .code-block {
   margin: 0 0 18px;
-  padding: 14px 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
   background: var(--code);
+  overflow: hidden;
+}
+#article .code-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 6px 10px 6px 14px;
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--panel) 70%, var(--code));
+}
+#article .code-lang {
+  color: var(--muted);
+  font: 600 11px var(--mono);
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+#article .copy-btn {
+  padding: 3px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 11px;
+  cursor: pointer;
+}
+#article .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+#article .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+#article pre {
+  overflow: auto;
+  margin: 0;
+  padding: 14px 16px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   line-height: 1.6;
 }
 #article pre code { padding: 0; background: none; font-size: 12.5px; }
