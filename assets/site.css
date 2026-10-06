@@ -378,17 +378,81 @@ button, input, select { font: inherit; }
 
 /* Feishu callouts: blockquotes that begin with an emoji become cards. */
 #article blockquote.vlm-callout {
-  padding: 11px 16px;
+  padding: 11px 14px 11px 10px;
   border-left-width: 4px;
   border-radius: 4px 12px 12px 4px;
   background: var(--accent-soft);
   color: var(--text);
 }
-#article blockquote.vlm-callout .callout-emoji {
-  margin-right: 6px;
-  font-size: 1.08em;
+#article .callout-layout {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  gap: 0 8px;
 }
+#article .callout-icon {
+  grid-column: 1;
+  grid-row: 1;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 1px;
+}
+#article blockquote.vlm-callout .callout-emoji {
+  display: block;
+  margin: 0;
+  font-size: 1.15em;
+  line-height: 1.55;
+}
+#article .callout-content {
+  grid-column: 2;
+  min-width: 0;
+}
+#article .callout-content > :last-child { margin-bottom: 0; }
+#article .callout-content > blockquote { margin-top: 8px; }
 #article blockquote.vlm-callout blockquote { background: none; }
+
+/* Semantic colours from the lecture legend: example details = orange, sample
+   values = yellow, first fixed parameters/results = red. */
+#article code.vlm-code-orange,
+#article code.vlm-code-yellow,
+#article code.vlm-code-red {
+  font-weight: 750;
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+#article code.vlm-code-orange {
+  color: #a94d00 !important;
+  background: #fff0df;
+}
+#article code.vlm-code-yellow {
+  color: #946200 !important;
+  background: #fff5c4;
+}
+#article code.vlm-code-red {
+  color: #b42318 !important;
+  background: #fde9e7;
+}
+
+/* Standalone bold items become a full-row highlighter heading. */
+#article li.vlm-highlight-row {
+  display: block;
+  width: 100%;
+  margin: 12px 0 14px;
+  padding: 7px 12px;
+  list-style: none;
+  border-radius: 7px;
+  background: #fff2a8;
+  color: var(--text);
+  line-height: 1.5;
+}
+#article li.vlm-highlight-row::before {
+  content: "•";
+  display: inline-block;
+  margin-right: 9px;
+  color: #5367d8;
+  font-weight: 800;
+}
 
 #article code {
   padding: 1px 5px;
@@ -707,6 +771,11 @@ body.dark #article blockquote { color: #c7cdea; }
 body.dark #article pre { background: #0b0e13; }
 body.dark .katex { color: var(--text); }
 body.dark mark.vlm-hit { color: #fff4d6; }
+body.dark #article code.vlm-code-orange { color: #ffb86c !important; background: #382a1c; }
+body.dark #article code.vlm-code-yellow { color: #ffd166 !important; background: #3c351f; }
+body.dark #article code.vlm-code-red { color: #ff8f87 !important; background: #402624; }
+body.dark #article li.vlm-highlight-row { background: #4b421f; color: var(--text); }
+body.dark #article li.vlm-highlight-row::before { color: #9aa8ff; }
 body.dark img { filter: brightness(.92); }
 
 /* ---------- responsive ---------- */

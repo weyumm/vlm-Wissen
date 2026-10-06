@@ -272,33 +272,137 @@
 
   /* ---------- images ---------- */
 
-  /* Feishu callouts survived in the Markdown as blockquotes whose text now
-     begins with the original emoji. Give them a card treatment. */
-  var EMOJI_RE = /^\s*(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/u;
+  /* Feishu callouts survive in Markdown as blockquotes whose first content
+     starts with an emoji. Move the emoji to a separate leading column so
+     wrapped text aligns below itself, not below the icon. */
+  var EMOJI_RE = /(\p{Extended_Pictographic}(?:\uFE0F|\u200D\p{Extended_Pictographic})*)/u;
 
   function enhanceCallouts() {
     var quotes = article.querySelectorAll('blockquote');
-    for (var i = 0; i < quotes.length; i++) {
+    /* Deepest first; don't also turn an outer quote into a second card when
+       its contents already include a styled child callout. */
+    for (var i = quotes.length - 1; i >= 0; i--) {
       var q = quotes[i];
-      if (q.classList.contains('vlm-callout')) continue;
-      /* The emoji may sit a few text nodes in (blockquote > p > text), and the
-         first text node can be just a newline, so scan rather than only
-         looking at the very first node. */
-      var walker = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, null);
+      if (q.classList.contains('vlm-callout') || q.querySelector('blockquote.vlm-callout')) continue;
+      var walker = document.createTreeWalker(q, NodeFilter.SHOW_TEXT, {
+        acceptNode: function (n) {
+          return n.parentElement && n.parentElement.closest('blockquote') === q
+            ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+        }
+      });
       var node, m = null;
       while ((node = walker.nextNode())) {
         m = EMOJI_RE.exec(node.nodeValue);
         if (m) break;
-        if (node.nodeValue.trim()) break;  // real content, no emoji -> give up
+        /* Emoji can occur on a later item in the same blockquote, e.g. the
+           second line of max/average-pooling alternatives. Keep scanning the
+           current quote instead of stopping at its first non-emoji paragraph. */
       }
       if (!m) continue;
-      q.classList.add('vlm-callout');
       var range = document.createRange();
       range.setStart(node, m.index);
       range.setEnd(node, m.index + m[1].length);
+      try { range.deleteContents(); } catch (e) { continue; }
+
       var badge = document.createElement('span');
       badge.className = 'callout-emoji';
-      try { range.surroundContents(badge); } catch (e) { /* already styled */ }
+      badge.textContent = m[1];
+      var layout = document.createElement('div');
+      layout.className = 'callout-layout';
+      var icon = document.createElement('div');
+      icon.className = 'callout-icon';
+      icon.appendChild(badge);
+      var content = document.createElement('div');
+      content.className = 'callout-content';
+      while (q.firstChild) content.appendChild(q.firstChild);
+      layout.appendChild(icon);
+      layout.appendChild(content);
+      q.appendChild(layout);
+      q.classList.add('vlm-callout');
+    }
+  }
+
+  function addSemanticClass(el, className) {
+    if (el && !el.classList.contains(className)) el.classList.add(className);
+  }
+
+  function inlineCodes(block) {
+    return Array.prototype.slice.call(block.querySelectorAll('code')).filter(function (c) {
+      return !c.closest('pre');
+    });
+  }
+
+  function normParam(s) {
+    return (s || '').replace(/\s+/g, '').replace(/[xX]/g, '×');
+  }
+
+  function enhanceSemanticColors() {
+    var blocks = article.querySelectorAll('p, li');
+    var example = null;
+    var padding = null;
+    var alexRate = null;
+    for (var i = 0; i < blocks.length; i++) {
+      var t = blocks[i].textContent;
+      if (!example && t.indexOf('原始图像用一个') >= 0 && t.indexOf('九宫格') >= 0) example = blocks[i];
+      if (!padding && t.indexOf('上述过程是基于无填充') >= 0 && t.indexOf('边缘') >= 0) padding = blocks[i];
+      if (!alexRate && t.indexOf('错误率从此前') >= 0 && t.indexOf('26.2%') >= 0) alexRate = blocks[i];
+    }
+
+    /* Conv example: dimensions orange, concrete sample values yellow. */
+    if (example) inlineCodes(example).forEach(function (code) {
+      var v = normParam(code.textContent);
+      if (/^\d+×\d+$/.test(v)) addSemanticClass(code, 'vlm-code-orange');
+      else if (/^-?\d+(?:\.\d+)?%?$/.test(v)) addSemanticClass(code, 'vlm-code-yellow');
+    });
+
+    /* First fixed padding value in the convolution explanation is red. */
+    if (padding) inlineCodes(padding).forEach(function (code) {
+      if (code.textContent.trim() === '0') addSemanticClass(code, 'vlm-code-red');
+    });
+
+    /* The model's first mention of each inline numeric parameter is red. */
+    var h3s = article.querySelectorAll('h3');
+    var lenet = null, alex = null, nextH3 = null;
+    for (var h = 0; h < h3s.length; h++) {
+      var ht = h3s[h].textContent;
+      if (!lenet && /1\.1\.2\s*LeNet/.test(ht)) lenet = h3s[h];
+      if (/1\.1\.3\s*AlexNet/.test(ht)) { alex = h3s[h]; break; }
+    }
+    if (lenet) {
+      var seen = new Set();
+      for (var j = 0; j < blocks.length; j++) {
+        var el = blocks[j];
+        var afterStart = !!(lenet.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+        var beforeEnd = !alex || !!(el.compareDocumentPosition(alex) & Node.DOCUMENT_POSITION_FOLLOWING);
+        if (!afterStart || !beforeEnd) continue;
+        inlineCodes(el).forEach(function (code) {
+          var v = normParam(code.textContent);
+          if (!/^-?\d+(?:\.\d+)?(?:×\d+)*(?:%)?$/.test(v) || seen.has(v)) return;
+          addSemanticClass(code, 'vlm-code-red');
+          seen.add(v);
+        });
+      }
+    }
+    if (alexRate) inlineCodes(alexRate).forEach(function (code) {
+      if (code.textContent.trim() === '26.2%' || code.textContent.trim() === '15.3%') {
+        addSemanticClass(code, 'vlm-code-red');
+      }
+    });
+  }
+
+  /* Highlight a standalone bold list heading as a full-width highlighter row. */
+  function enhanceHighlightRows() {
+    var items = article.querySelectorAll('ul > li, ol > li');
+    for (var i = 0; i < items.length; i++) {
+      var li = items[i];
+      var meaningful = Array.prototype.filter.call(li.childNodes, function (n) {
+        return n.nodeType === Node.ELEMENT_NODE || (n.nodeType === Node.TEXT_NODE && n.nodeValue.trim());
+      });
+      if (meaningful.length !== 1) continue;
+      var only = meaningful[0];
+      if (only.nodeType === Node.ELEMENT_NODE && only.tagName === 'STRONG' && only.textContent.trim().length <= 24) {
+        li.classList.add('vlm-highlight-row');
+      }
     }
   }
 
@@ -600,6 +704,8 @@
       tuneImages();
       enhanceCallouts();
       enhanceCodeBlocks();
+      enhanceSemanticColors();
+      enhanceHighlightRows();
       Array.prototype.forEach.call(article.querySelectorAll('a[href^="http"]'), function (a) {
         a.setAttribute('target', '_blank');
         a.setAttribute('rel', 'noopener noreferrer');
