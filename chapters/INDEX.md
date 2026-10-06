@@ -1,7 +1,7 @@
 ## 视觉多模态讲义（上）
 
-- [`01-视觉基础--CNN-骨干网络.md`](lecture-1/01-视觉基础--CNN-骨干网络.md) — 视觉基础 · CNN 骨干网络
-- [`02-视觉基础--Transformer-骨干网络.md`](lecture-1/02-视觉基础--Transformer-骨干网络.md) — 视觉基础 · Transformer 骨干网络
+- [`01-视觉基础--CNN-骨干网络.md`](lecture-1/01-视觉基础--CNN-骨干网络.md) — 视觉基础 · CNN 骨干网络 · 含代码
+- [`02-视觉基础--Transformer-骨干网络.md`](lecture-1/02-视觉基础--Transformer-骨干网络.md) — 视觉基础 · Transformer 骨干网络 · 含代码
 - [`03-视觉基础--对比学习.md`](lecture-1/03-视觉基础--对比学习.md) — 视觉基础 · 对比学习
 - [`04-视觉基础--其他经典模型.md`](lecture-1/04-视觉基础--其他经典模型.md) — 视觉基础 · 其他经典模型
 - [`05-Vision-Language-Model--前期探索.md`](lecture-1/05-Vision-Language-Model--前期探索.md) — Vision-Language Model · 前期探索

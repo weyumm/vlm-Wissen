@@ -82,7 +82,71 @@ z_{\ell} &= \text{MLP}(\text{LN}(z_{\ell}')) + z_{\ell}', \quad \ell = 1 \ldots 
 
 总的来说，<span style="color: rgb(100,37,208); background-color: inherit">Vision Transformer 在计算机视觉领域是一项很有意义的工作，它打破了传统 CNN 在视觉领域的主导地位，为深度学习研究开辟了新的方向</span>。
 
+```python
+class MultiHeadSelfAttention(nn.Module):
+    def __init__(self, dim, num_heads=8, dropout=0.0):
+        super().__init__()
+        assert dim % num_heads == 0, "dim must divisible by num_heads"
+        self.num_heads = num_heads
+        self.head_dim = dim // num_heads
+
+        # q, k, v 的线性变换
+        self.qkv = nn.Linear(dim, dim * 3)
+        self.dropout = nn.Dropout(dropout)
+```
+
+
 **<span style="color: rgb(222,120,2); background-color: inherit">代码实现</span>**
+
+
+```python
+import torch
+
+# 假设你的 ViT 类名是 VisionTransformer，已经定义好
+# from your_vit_module import VisionTransformer
+
+# 先创建一个随机图像张量
+# 假设输入图像大小是 224x224，3 通道 (RGB)，batch 大小是 1
+img = torch.randn(1, 3, 224, 224)  # torch.randn 生成标准正态分布的随机数 :contentReference[oaicite:0]{index=0}
+
+# 创建 ViT 模型实例
+```
+
+
+```python
+class VisionTransformer(nn.Module):
+    def __init__(self, *, img_size=224, patch_size=16, num_classes=1000,
+                 dim=768, depth=12, num_heads=12, mlp_dim=3072, dropout=0.0):
+        super().__init__()
+        # patch embedding
+        self.patch_embed = PatchEmbedding(img_size, patch_size, in_channels=3, embed_dim=dim)
+        num_patches = (img_size // patch_size) ** 2
+
+        # learnable class token
+        self.cls_token = nn.Parameter(torch.zeros(1, 1, dim))
+        # position embedding
+        self.pos_embed = nn.Parameter(torch.zeros(1, 1 + num_patches, dim))  # +1 for cls token
+        self.pos_dropout = nn.Dropout(dropout)
+```
+
+
+```python
+class TransformerEncoderBlock(nn.Module):
+    def __init__(self, dim, num_heads, mlp_dim, dropout=0.0):
+        super().__init__()
+        self.norm1 = nn.LayerNorm(dim)
+        self.attn = MultiHeadSelfAttention(dim, num_heads, dropout)
+        self.norm2 = nn.LayerNorm(dim)
+        self.ff = FeedForward(dim, mlp_dim, dropout)
+```
+
+
+```python
+class FeedForward(nn.Module):
+    def __init__(self, dim, hidden_dim, dropout=0.0):
+        super().__init__()
+        self.net = nn.Sequential(
+```
 
 ### 1.2.2 <span style="color: rgb(36,91,219); background-color: inherit">DeiT</span>
 
