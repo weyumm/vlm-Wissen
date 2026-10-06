@@ -267,7 +267,7 @@ $$\begin{aligned}
 
 > 📌 1. **全变差 <span style="color: rgb(216,57,49); background-color: inherit">TV</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">T</span>**<span style="color: rgb(216,57,49); background-color: inherit">otal </span>**<span style="color: rgb(216,57,49); background-color: inherit">V</span>**<span style="color: rgb(216,57,49); background-color: inherit">ariation）</span>**距离**：
 >
->    $$\delta(P_r, P_g) = \sup_{A \in \Sigma} |P_r(A) - P_g(A)|$$
+>    📌 $$\delta(P_r, P_g) = \sup_{A \in \Sigma} |P_r(A) - P_g(A)|$$
 >
 > 2. **<span style="color: rgb(216,57,49); background-color: inherit">KL</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">K</span>**<span style="color: rgb(216,57,49); background-color: inherit">ullback-</span>**<span style="color: rgb(216,57,49); background-color: inherit">L</span>**<span style="color: rgb(216,57,49); background-color: inherit">eibler）</span>**散度**：
 >
@@ -595,7 +595,7 @@ $$R_\beta(W) = \beta \|W^\top W \odot (1 - I)\|_F^2$$
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">设计动机与整体架构</span>**
 
-1. **<span style="color: rgb(36,91,219); background-color: inherit">为什么要重做 Generator</span>**
+> ⭐ 1. **<span style="color: rgb(36,91,219); background-color: inherit">为什么要重做 Generator</span>**
 
 传统的 Progressive GAN 把 latent code 只送入 Generator 的第一层，后续层必须从这一份输入中同时组织姿态、身份、颜色、纹理和随机细节。这样的生成过程可以得到高分辨率图像，但 latent space 与各层特征之间没有清晰接口：想只改变发丝而不改变身份，或只改变姿态而保留配色，都很难直接控制。
 

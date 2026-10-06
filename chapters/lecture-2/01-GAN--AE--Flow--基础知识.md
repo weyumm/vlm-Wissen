@@ -95,7 +95,7 @@ $$\min_G \max_D V(D, G) = \mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x)] + \m
 
 这一目标函数包含两个关键项：
 
-> * 第一项$$\mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x)]$$<span style="color: rgb(100,37,208); background-color: inherit">鼓励判别器对真实样本赋予高置信度</span>，即$$D(x) \to 1$$，从而提升其识别真实数据的能力
+> 👍 * 第一项$$\mathbb{E}_{x \sim p_{\text{data}}(x)}[\log D(x)]$$<span style="color: rgb(100,37,208); background-color: inherit">鼓励判别器对真实样本赋予高置信度</span>，即$$D(x) \to 1$$，从而提升其识别真实数据的能力
 >
 > * 第二项$$\mathbb{E}_{z \sim p_z(z)}[\log(1 - D(G(z)))]$$<span style="color: rgb(100,37,208); background-color: inherit">鼓励判别器将生成样本识别为假</span>，即$$D(G(z)) \to 0$$
 

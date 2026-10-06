@@ -92,7 +92,7 @@ $$\|J_f(\mathbf{x})\|_F^2 = \sum_{ij} \left( \frac{\partial h_j(\mathbf{x})}{\pa
 
 现在不再将输入映射为一个固定的向量，而是希望将其映射为一个分布。把这个分布标记为$$p_{\theta}(\mathbf{z})$$，其参数由$$\theta$$决定。数据输入$$\mathbf{x}$$与潜在编码向量$$\mathbf{z}$$之间的关系可以完全由以下三个部分定义：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">先验分布 </span>$$p_{\theta}(\mathbf{z})$$**
+> 👍 * **<span style="color: rgb(36,91,219); background-color: inherit">先验分布 </span>$$p_{\theta}(\mathbf{z})$$**
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">似然函数 </span>$$p_{\theta}(\mathbf{x}|\mathbf{z})$$**
 >
@@ -122,7 +122,7 @@ $$p_{\theta}(\mathbf{x}^{(i)}) = \int p_{\theta}(\mathbf{x}^{(i)}|\mathbf{z}) p_
 
 现在，这个结构看起来非常类似于自编码器：
 
-> * 条件概率$$p_{\theta}(\mathbf{x}|\mathbf{z})$$定义了一个生成模型，类似于前面解码器$$f_{\theta}(\mathbf{z})$$。$$p_{\theta}(\mathbf{x}|\mathbf{z})$$ 也被称为概率性解码器 probabilistic decoder
+> 👍 * 条件概率$$p_{\theta}(\mathbf{x}|\mathbf{z})$$定义了一个生成模型，类似于前面解码器$$f_{\theta}(\mathbf{z})$$。$$p_{\theta}(\mathbf{x}|\mathbf{z})$$ 也被称为概率性解码器 probabilistic decoder
 >
 > * 近似函数$$q_{\phi}(\mathbf{z}|\mathbf{x})$$是概率性编码器 probabilistic encoder，作用类似于之前提到的$$g_{\phi}(\mathbf{z}|\mathbf{x})$$
 
@@ -213,7 +213,7 @@ $$-L_{\mathrm{VAE}} = \log p_{\theta}(\mathbf{x}) - D_{\mathrm{KL}}(q_{\phi}(\ma
 
 $$p_\theta(y|x)=\int_z p_\theta(y|x,z)p_\theta(z|x)dz$$
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">条件先验分布</span>$$p_\theta(z|x)$$：** 隐空间$$z$$的先验分布此时不再是各向同性的标准高斯分布，而是依赖于输入条件$$x$$的条件高斯分布。
+> 🥖 * **<span style="color: rgb(36,91,219); background-color: inherit">条件先验分布</span>$$p_\theta(z|x)$$：** 隐空间$$z$$的先验分布此时不再是各向同性的标准高斯分布，而是依赖于输入条件$$x$$的条件高斯分布。
 >
 > * **<span style="color: rgb(36,91,219); background-color: inherit">条件似然分布</span>$$p_\theta(y|x,z)$$：** 由神经网络参数化的概率解码器，它同时接收条件$$x$$和隐变量$$z$$，并解码输出目标$$y$$。
 
@@ -620,7 +620,7 @@ VQ-VAE-2 是一个结合了自注意力自回归模型的两层层次化 VQ-VAE�
 
 * **<span style="color: rgb(36,91,219); background-color: inherit">RQ-VAE</span>**
 
-RQ-VAE 是由 Kakao Brain 团队于 CVPR 2022 提出的离散自编码器变体，它是对传统 VQ-VAE 的重要泛化与升级 。在自回归图像生成领域，将连续的图像特征转换为离散 Token 是必经之路。传统的 VQ-VAE 面临一个两难：<span style="color: rgb(216,57,49); background-color: inherit">为了降低量化误差并保持重构保真度，要么必须维持一个庞大的 Codebook，导致自回归模型的词表过大、难以训练，要么必须保留较大的空间分辨率，导致自回归模型需要预测的序列极长，计算开销呈二次方爆炸</span>。
+> 🎹 RQ-VAE 是由 Kakao Brain 团队于 CVPR 2022 提出的离散自编码器变体，它是对传统 VQ-VAE 的重要泛化与升级 。在自回归图像生成领域，将连续的图像特征转换为离散 Token 是必经之路。传统的 VQ-VAE 面临一个两难：<span style="color: rgb(216,57,49); background-color: inherit">为了降低量化误差并保持重构保真度，要么必须维持一个庞大的 Codebook，导致自回归模型的词表过大、难以训练，要么必须保留较大的空间分辨率，导致自回归模型需要预测的序列极长，计算开销呈二次方爆炸</span>。
 
 RQ-VAE 创新地引入了<span style="color: rgb(216,57,49); background-color: inherit">残差量化 </span>**<span style="color: rgb(216,57,49); background-color: inherit">RQ</span>**<span style="color: rgb(216,57,49); background-color: inherit">（</span>**<span style="color: rgb(216,57,49); background-color: inherit">R</span>**<span style="color: rgb(216,57,49); background-color: inherit">esidual </span>**<span style="color: rgb(216,57,49); background-color: inherit">Q</span>**<span style="color: rgb(216,57,49); background-color: inherit">uantization）</span>机制，它可以在不增加 Codebook 大小$$K$$且极度压缩空间分辨率的前提下，通过对量化残差进行逐级递归量化，实现高精度、高保真度的重构。
 
@@ -732,7 +732,7 @@ SQ-VAE 提出，<span style="color: rgb(100,37,208); background-color: inherit">
 
 SQ-VAE 建立在连续隐变量$$z \in \mathbb{R}^D$$与离散隐变量$$z_q \in \mathcal{B}$$联合分布的概率生成框架上。其 Codebook 定义为$$\mathcal{B} = \{b_1, b_2, \dots, b_K\} \subset \mathbb{R}^D$$：
 
-> * **<span style="color: rgb(36,91,219); background-color: inherit">生成路径</span>**
+> 🎨 * **<span style="color: rgb(36,91,219); background-color: inherit">生成路径</span>**
 >
 > 离散先验$$z_q$$ $$\rightarrow$$ 随机反量化$$p_φ(z|z_q)$$ $$\rightarrow$$ 连续$$z$$ $$\rightarrow$$ 概率解码器$$p_θ(x|z)$$ $$\rightarrow$$ $$x$$
 >

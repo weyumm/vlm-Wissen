@@ -193,7 +193,7 @@ def validate_media_files(record: dict[str, Any], data_root: Path) -> list[str]:
 {"sample_id":"demo_train_001","group_id":"product_demo_001","split":"train","images":["sample/assets/demo_product.ppm"],"media_sha256":["bfb01feb120b746a4e277cf1f4dadd71b3bdb58c05e9e2df1877910cd6ae6a9b"],"messages":[{"role":"user","content":"<image>\n只根据图片提取商品类型、颜色、材质和可见文字。无法从图中确认的字段使用空数组；不要根据常识补写。严格按 vlm_product.schema.v1 输出 JSON。"},{"role":"assistant","content":"{\"schema_version\":\"1.0\",\"product_type\":\"unknown\",\"attributes\":{\"color\":[\"black\",\"white\"],\"material\":[]},\"visible_text\":[],\"evidence\":[{\"field\":\"attributes.color\",\"media_index\":0,\"support\":\"image_level\"}],\"decision\":\"review\"}"}],"source":{"dataset":"synthetic_format_demo","snapshot_id":"demo-v1","license_id":"CC0-1.0","source_uri":"local-generated"},"review_required":false}
 ```
 
-> **<span style="color: rgb(36,91,219); background-color: inherit">校验门禁</span>**
+> ✅ **<span style="color: rgb(36,91,219); background-color: inherit">校验门禁</span>**
 >
 > <span style="color: rgb(46,161,33); background-color: inherit">非 messages/role/content 格式、角色顺序错误、图片占位符数量不一致、assistant 答案含图片占位符、媒体哈希错误、来源字段不完整、未经审核的训练记录、group 跨 split 和相同媒体跨 split 都会被拒绝。</span>
 
@@ -284,7 +284,7 @@ Zero-Shot 适配器固定 `transformers>=4.57.0` 和 `qwen-vl-utils==0.0.14`，�
 
 ### 2.1.7 <span style="color: rgb(36,91,219); background-color: inherit">LoRA SFT</span>
 
-LoRA 从 4B Instruct、`qwen3_vl_nothink`、rank 8、`lora_target: all`、学习率 1e-4、单卡 batch 1、梯度累积 8 和三轮训练起步。学习率、轮数、rank 与 target modules 在 Validation 上逐项比较；每次运行同时记录模型 revision、LLaMA-Factory commit、数据快照和许可证哈希。
+> 📌 LoRA 从 4B Instruct、`qwen3_vl_nothink`、rank 8、`lora_target: all`、学习率 1e-4、单卡 batch 1、梯度累积 8 和三轮训练起步。学习率、轮数、rank 与 target modules 在 Validation 上逐项比较；每次运行同时记录模型 revision、LLaMA-Factory commit、数据快照和许可证哈希。
 
 ```yaml
 ### model
