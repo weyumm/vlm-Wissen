@@ -469,6 +469,16 @@ button, input, select { font: inherit; }
   background: var(--code);
   overflow: hidden;
 }
+/* Empty frame waiting for its code block to be filled in on scroll. */
+#article .code-pending {
+  margin: 0 0 18px;
+  min-height: 74px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--code);
+  opacity: .7;
+}
+
 #article .code-head {
   display: flex;
   align-items: center;
@@ -533,6 +543,14 @@ button, input, select { font: inherit; }
   border-radius: 10px;
   background: var(--panel);
   cursor: zoom-in;
+}
+
+/* Placeholder frame while a figure is still queued; alt text stays hidden so
+   only the skeleton shows. */
+#article img:not(.img-ready) {
+  min-height: 56px;
+  background: var(--code);
+  color: transparent;
 }
 
 #article hr { margin: 32px 0; border: 0; border-top: 1px solid var(--line); }

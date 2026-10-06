@@ -137,9 +137,19 @@
 
   /* ---------- markdown + math ---------- */
 
-  var MATH_TOKEN = /@@VLMATH(\d+)@@/g;
   var mathSpans = [];
 
+  function escapeHtml(s) {
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  /* Formulas are emitted straight into the Markdown as placeholder spans, so
+     the browser builds them while parsing innerHTML. Creating them afterwards
+     with a JS loop over ~700 text nodes was itself a multi-hundred-ms task. */
   function extractMath(md) {
     mathSpans = [];
     /* Skip fenced code blocks only — `$$` there is a shell PID, not math.
@@ -162,11 +172,27 @@
             display = true;
           }
         }
+        var idx = mathSpans.length;
         mathSpans.push({ tex: tex, display: display });
-        return '@@VLMATH' + (mathSpans.length - 1) + '@@';
+        return '<span class="vlm-math-pending' + (display ? ' display' : '') +
+          '" data-mi="' + idx + '">' + escapeHtml(tex) + '</span>';
       });
     }
     return out;
+  }
+
+  /* Fenced code blocks are pulled out of the Markdown before rendering and
+     replaced with empty placeholders. A chapter can carry 100+ blocks; keeping
+     their text out of innerHTML is what keeps parsing cheap. */
+  var codeStore = [];
+
+  function extractCode(md) {
+    codeStore = [];
+    return md.replace(/^```([^\n]*)\n([\s\S]*?)^```[ \t]*$/gm, function (m, lang, body) {
+      var idx = codeStore.length;
+      codeStore.push({ lang: (lang || '').trim(), code: body.replace(/\n+$/, '') });
+      return '<div class="code-pending" data-ci="' + idx + '"></div>';
+    });
   }
 
   function katexNode(span) {
@@ -184,90 +210,102 @@
     return box;
   }
 
-  /* Formulas are rendered LAZILY: the placeholder is swapped for a small span
-     holding the raw TeX at insert time, and KaTeX only runs when the span
-     approaches the viewport. A chapter with a thousand formulas therefore
-     paints instantly and only pays for the ones actually read. */
-  var mathObserver = null;
+  /* Formulas are virtualised. The Markdown already carries a lightweight
+     placeholder span (raw TeX as text); KaTeX only runs for formulas near the
+     viewport, and formulas that scroll far away are recycled back to the
+     placeholder. That keeps the live DOM small even in a chapter with 700+
+     formulas, which is what made scrolling heavy. */
+  var renderObserver = null;   /* 350px around the viewport: typeset */
+  var recycleObserver = null;  /* beyond 1500px: recycle back to raw TeX */
 
   function renderPending(el) {
     var span = mathSpans[parseInt(el.getAttribute('data-mi'), 10)];
     if (!span) { el.remove(); return; }
+    /* output:'html' skips KaTeX's parallel MathML tree, which roughly doubled
+       the node count of a formula-heavy chapter. */
     el.innerHTML = katex.renderToString(span.tex, {
       displayMode: span.display,
       throwOnError: false,
-      strict: false
+      strict: false,
+      output: 'html'
     });
     el.classList.remove('vlm-math-pending');
-    el.removeAttribute('data-mi');
+    el.classList.add('vlm-math-done');
+    /* data-mi is kept so the formula can be recycled later. */
+  }
+
+  function recycleMath(el) {
+    var span = mathSpans[parseInt(el.getAttribute('data-mi'), 10)];
+    if (!span) return;
+    el.textContent = span.tex;
+    el.classList.add('vlm-math-pending');
+    el.classList.remove('vlm-math-done');
+    if (renderObserver) renderObserver.observe(el);
   }
 
   function hydrateMath() {
-    if (mathObserver) { mathObserver.disconnect(); mathObserver = null; }
-    var walker = document.createTreeWalker(article, NodeFilter.SHOW_TEXT, null);
-    var targets = [];
-    while (walker.nextNode()) {
-      if (walker.currentNode.nodeValue.indexOf('@@VLMATH') >= 0) targets.push(walker.currentNode);
-    }
-    var pending = [];
-
-    for (var t = 0; t < targets.length; t++) {
-      var node = targets[t];
-      var frag = document.createDocumentFragment();
-      var value = node.nodeValue;
-      var last = 0;
-      var m;
-      MATH_TOKEN.lastIndex = 0;
-      while ((m = MATH_TOKEN.exec(value)) !== null) {
-        if (m.index > last) frag.appendChild(document.createTextNode(value.slice(last, m.index)));
-        var idx = parseInt(m[1], 10);
-        var span = mathSpans[idx];
-        if (span) {
-          var ph = document.createElement('span');
-          ph.className = 'vlm-math-pending' + (span.display ? ' display' : '');
-          ph.setAttribute('data-mi', String(idx));
-          ph.textContent = span.tex;
-          frag.appendChild(ph);
-          pending.push(ph);
-        }
-        last = m.index + m[0].length;
-      }
-      if (last < value.length) frag.appendChild(document.createTextNode(value.slice(last)));
-      if (node.parentNode) node.parentNode.replaceChild(frag, node);
-    }
-
+    if (renderObserver) { renderObserver.disconnect(); renderObserver = null; }
+    if (recycleObserver) { recycleObserver.disconnect(); recycleObserver = null; }
+    /* The spans already exist in the DOM (emitted by extractMath), so this is
+       just a query — no per-node DOM surgery. */
+    var pending = Array.prototype.slice.call(article.querySelectorAll('.vlm-math-pending'));
     if (!pending.length) return;
     if (!('IntersectionObserver' in window)) {
       pending.forEach(renderPending);
       return;
     }
-    mathObserver = new IntersectionObserver(function (entries) {
+    renderObserver = new IntersectionObserver(function (entries) {
       for (var i = 0; i < entries.length; i++) {
-        if (!entries[i].isIntersecting) continue;
-        mathObserver.unobserve(entries[i].target);
-        renderPending(entries[i].target);
+        var el = entries[i].target;
+        if (entries[i].isIntersecting && el.classList.contains('vlm-math-pending')) {
+          renderObserver.unobserve(el);
+          enqueueMath(el);
+        }
       }
-    }, { rootMargin: '400px 0px' });
-    pending.forEach(function (el) { mathObserver.observe(el); });
+    }, { rootMargin: '350px 0px' });
+    recycleObserver = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        var el = entries[i].target;
+        if (!entries[i].isIntersecting && el.classList.contains('vlm-math-done')) {
+          recycleMath(el);
+        }
+      }
+    }, { rootMargin: '1500px 0px' });
+    pending.forEach(observeMath);
+  }
 
-    /* Safety net: drain whatever the observer has not reached yet in small
-       idle batches, so a very fast scroll or a Ctrl+F still ends up with
-       every formula typeset — without ever blocking the first paint. */
-    var queue = pending.slice();
-    var drain = function () {
-      if (!queue.length) return;
-      var stop = Math.min(queue.length, 50);
-      for (var k = 0; k < stop; k++) {
-        var el = queue[k];
-        if (el.isConnected && el.classList.contains('vlm-math-pending')) renderPending(el);
-      }
-      queue.splice(0, stop);
-      if (queue.length) {
-        if (window.requestIdleCallback) requestIdleCallback(drain, { timeout: 2000 });
-        else setTimeout(drain, 250);
-      }
-    };
-    setTimeout(drain, 1500);
+  function observeMath(el) {
+    if (renderObserver) renderObserver.observe(el);
+    if (recycleObserver) recycleObserver.observe(el);
+  }
+
+  /* One throttled queue for formula rendering; each animation frame only
+     typesets a small batch so no single frame blocks for long. */
+  var mathQueue = [];
+  var mathFlushing = false;
+
+  function enqueueMath(el) {
+    if (!el || !el.classList || !el.classList.contains('vlm-math-pending')) return;
+    mathQueue.push(el);
+    if (!mathFlushing) {
+      mathFlushing = true;
+      (window.requestAnimationFrame || setTimeout)(flushMath, 0);
+    }
+  }
+
+  function flushMath() {
+    var budget = 10;
+    var n = 0;
+    while (mathQueue.length && n < budget) {
+      var el = mathQueue.shift();
+      if (el.isConnected && el.classList.contains('vlm-math-pending')) renderPending(el);
+      n++;
+    }
+    if (mathQueue.length) {
+      (window.requestAnimationFrame || setTimeout)(flushMath, 0);
+    } else {
+      mathFlushing = false;
+    }
   }
 
   /* ---------- images ---------- */
@@ -406,68 +444,169 @@
     }
   }
 
-  /* Wrap every <pre> in a frame with a language label and a copy button. */
-  function enhanceCodeBlocks() {
-    var pres = article.querySelectorAll('pre');
-    for (var i = 0; i < pres.length; i++) {
-      var pre = pres[i];
-      if (!pre.parentNode) continue;
-      if (pre.parentNode.classList && pre.parentNode.classList.contains('code-block')) continue;
-      var code = pre.querySelector('code');
-      var lang = '';
-      if (code && code.className) {
-        var lm = /language-([\w+#-]+)/.exec(code.className);
-        if (lm) lang = lm[1];
+  /* Shared frame header: language label + copy button. The button reads the
+     <code> from the enclosing frame, so the same helper serves both wrapped
+     <pre> elements and the placeholders produced by extractCode. */
+  function buildCodeHead(lang) {
+    var head = document.createElement('div');
+    head.className = 'code-head';
+    var tag = document.createElement('span');
+    tag.className = 'code-lang';
+    tag.textContent = lang || 'code';
+    var btn = document.createElement('button');
+    btn.className = 'copy-btn';
+    btn.type = 'button';
+    btn.textContent = '复制';
+    btn.addEventListener('click', function () {
+      var b = this;
+      var c = b.parentNode.parentNode.querySelector('code');
+      var text = c ? c.textContent : '';
+      var done = function () {
+        b.textContent = '已复制';
+        b.classList.add('copied');
+        setTimeout(function () { b.textContent = '复制'; b.classList.remove('copied'); }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () {});
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) {}
+        ta.remove();
       }
-      var wrap = document.createElement('div');
-      wrap.className = 'code-block';
-      var head = document.createElement('div');
-      head.className = 'code-head';
-      var tag = document.createElement('span');
-      tag.className = 'code-lang';
-      tag.textContent = lang || 'code';
-      var btn = document.createElement('button');
-      btn.className = 'copy-btn';
-      btn.type = 'button';
-      btn.textContent = '复制';
-      btn.addEventListener('click', function () {
-        var b = this;
-        var c = b.parentNode.parentNode.querySelector('code');
-        var text = c ? c.textContent : '';
-        var done = function () {
-          b.textContent = '已复制';
-          b.classList.add('copied');
-          setTimeout(function () { b.textContent = '复制'; b.classList.remove('copied'); }, 1600);
-        };
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(text).then(done, function () {});
-        } else {
-          var ta = document.createElement('textarea');
-          ta.value = text;
-          document.body.appendChild(ta);
-          ta.select();
-          try { document.execCommand('copy'); done(); } catch (e) {}
-          ta.remove();
-        }
-      });
-      head.appendChild(tag);
-      head.appendChild(btn);
-      pre.parentNode.insertBefore(wrap, pre);
-      wrap.appendChild(head);
-      wrap.appendChild(pre);
-    }
+    });
+    head.appendChild(tag);
+    head.appendChild(btn);
+    return head;
   }
 
+  /* Wrap a <pre> that is already in the document (indented code blocks). */
+  function wrapCode(pre) {
+    if (!pre.parentNode) return;
+    if (pre.parentNode.classList && pre.parentNode.classList.contains('code-block')) return;
+    var code = pre.querySelector('code');
+    var lang = '';
+    if (code && code.className) {
+      var lm = /language-([\w+#-]+)/.exec(code.className);
+      if (lm) lang = lm[1];
+    }
+    var wrap = document.createElement('div');
+    wrap.className = 'code-block';
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(buildCodeHead(lang));
+    wrap.appendChild(pre);
+  }
+
+  /* Turn an empty placeholder into a real, populated code frame. */
+  function fillCode(node) {
+    var item = codeStore[parseInt(node.getAttribute('data-ci'), 10)];
+    if (!item) { node.remove(); return; }
+    var pre = document.createElement('pre');
+    var code = document.createElement('code');
+    if (item.lang) code.className = 'language-' + item.lang;
+    code.textContent = item.code;
+    pre.appendChild(code);
+    node.classList.remove('code-pending');
+    node.classList.add('code-block');
+    node.appendChild(buildCodeHead(item.lang));
+    node.appendChild(pre);
+  }
+
+  /* Frames are built only as they approach the viewport. A chapter with 100+
+     blocks would otherwise spend hundreds of ms in one synchronous pass — the
+     stutter that was reported. */
+  function enhanceCodeBlocks() {
+    var targets = Array.prototype.slice.call(article.querySelectorAll('.code-pending, pre'))
+      .filter(function (el) { return !el.closest('.code-block'); });
+    if (!targets.length) return;
+    var upgrade = function (el) {
+      if (el.classList.contains('code-pending')) fillCode(el); else wrapCode(el);
+    };
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(upgrade);
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      for (var i = 0; i < entries.length; i++) {
+        if (!entries[i].isIntersecting) continue;
+        io.unobserve(entries[i].target);
+        upgrade(entries[i].target);
+      }
+    }, { rootMargin: '600px 0px' });
+    targets.forEach(function (el) { io.observe(el); });
+  }
+
+  /* Images go through a small queue. Decoding a dozen full-width figures at the
+     same time is what made scrolling stutter, so at most a few load at once and
+     everything below the fold waits until it is nearly on screen. */
   function tuneImages() {
     var imgs = article.querySelectorAll('img');
+    if (!imgs.length) return;
+    var EAGER = 4;          /* above-the-fold figures load right away */
+    var MAX_PARALLEL = 2;   /* decode at most this many at a time */
+    var deferred = [];
+    var queue = [];
+    var active = 0;
+
+    function pump() {
+      while (active < MAX_PARALLEL && queue.length) {
+        (function (img) {
+          var src = img.getAttribute('data-src');
+          img.removeAttribute('data-src');
+          active++;
+          var settle = function () {
+            active--;
+            img.classList.add('img-ready');
+            pump();
+          };
+          img.addEventListener('load', settle, { once: true });
+          img.addEventListener('error', function () {
+            img.classList.add('img-missing');
+            settle();
+          }, { once: true });
+          img.src = src;
+        })(queue.shift());
+      }
+    }
+
     for (var i = 0; i < imgs.length; i++) {
       var img = imgs[i];
-      /* The first figures are usually above the fold — load them eagerly. */
-      img.loading = i < 4 ? 'eager' : 'lazy';
       img.decoding = 'async';
       if (!img.getAttribute('alt')) img.setAttribute('alt', '讲义配图');
-      img.addEventListener('error', function () { this.classList.add('img-missing'); });
+      if (img.complete && img.naturalWidth) {
+        img.classList.add('img-ready');
+        continue;
+      }
+      if (i < EAGER) {
+        /* keep the real src; just mark it once it has painted */
+        img.addEventListener('load', function () { this.classList.add('img-ready'); }, { once: true });
+        img.addEventListener('error', function () {
+          this.classList.add('img-missing', 'img-ready');
+        }, { once: true });
+      } else {
+        img.setAttribute('data-src', img.getAttribute('src') || '');
+        img.removeAttribute('src');
+        deferred.push(img);
+      }
     }
+
+    if (!deferred.length) return;
+    if (!('IntersectionObserver' in window)) {
+      queue = deferred.slice();
+      pump();
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      for (var j = 0; j < entries.length; j++) {
+        if (!entries[j].isIntersecting) continue;
+        io.unobserve(entries[j].target);
+        queue.push(entries[j].target);
+      }
+      pump();
+    }, { rootMargin: '500px 0px' });
+    deferred.forEach(function (el) { io.observe(el); });
   }
 
   /* ---------- table of contents ---------- */
@@ -550,11 +689,20 @@
     for (var i = 0; i < links.length; i++) links[i].style.display = '';
   }
 
+  /* Code blocks stay out of the DOM until scrolled to, so fill in whatever is
+     still pending before searching — otherwise their text would be invisible
+     to Ctrl+F. */
+  function ensureCodeFilled() {
+    var nodes = article.querySelectorAll('.code-pending');
+    Array.prototype.forEach.call(nodes, fillCode);
+  }
+
   function runSearch(raw) {
     clearSearch();
     resetTocFilter();
     var q = raw.trim().toLowerCase();
     if (q.length < 2) return;
+    ensureCodeFilled();
 
     var links = toc.querySelectorAll('.side-link');
     for (var i = 0; i < links.length; i++) {
@@ -690,7 +838,9 @@
       md = md.replace(/\n---\n\n\[Previous\][^\n]*\s*$/, '');
       /* "\$$" occurs once in the source as an escaped delimiter artifact. */
       md = md.replace(/\\\$\$/g, '$$$$');
-      var prepared = extractMath(md);
+      /* Pull code blocks out first so their text never reaches innerHTML, then
+         wrap the remaining formulas in placeholder spans. */
+      var prepared = extractMath(extractCode(md));
       if (!window.marked || !window.DOMPurify || !window.katex) {
         throw new Error('渲染组件未载入，请确认 assets/vendor 下的脚本可以访问。');
       }
